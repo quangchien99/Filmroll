@@ -70,8 +70,31 @@ Settings entry and pops instead of continuing.
 ### Image processing pipeline
 1. **Load** — image picked via FileKit, copied into the app cache (`FileHandler`)
 2. **Process** — `SkiaImageProcessor` applies the LUT and adjustments via runtime shaders
-3. **Thumbnail** — generated per LUT for the picker
+3. **Thumbnail** — the user's own photo is re-rendered through each LUT on the visible shelf,
+   so the film strip previews the actual picture rather than a stock sample
 4. **Export** — full resolution to the gallery, JPEG or source format with EXIF
+
+### Design system
+`theme/` holds the "Darkroom" system: a warm-neutral palette with a safelight-amber primary
+(`Color.kt`), a hand-tuned type scale plus the `readoutTextStyle` / `eyebrowTextStyle` used by the
+editor (`Type.kt`), and `Theme.kt`, which wires those into `AppTheme` and adds what Material has no
+slot for — `FilmrollTokens` (the fixed near-black editor canvas and its on-colours, reachable via
+`FilmrollTheme.tokens`) and the two shared motion specs, `emphatic()` for finger-driven changes and
+`standard()` for everything else. The canvas is deliberately identical in light and dark so the
+photo is always judged against a neutral surround.
+
+`view/` holds the reusable pieces: `ToolSlider` (the editor's only slider — fill drawn from the
+neutral point outward, snap-to-default detent, haptic tick), `FilmStrip`, `FilmBrowserSheet`,
+`Chrome.kt` (panels, icon buttons, `SegmentedTabs`, chips), `SettingsUi.kt` (grouped-card rows) and
+`AppDialog`. There is no blur anywhere — Compose's blur is Android 12+ only and absent on iOS, so
+translucent fills stand in for glass.
+
+### Editor layout
+`HomeScreen` is a full-bleed canvas with floating chrome, not a form. `AdjustmentTool` describes
+every adjustment once (range, neutral value, icon, label, read/write accessors) and the adjust rail
+renders generically from it — adding an adjustment means adding an enum entry and a string. Rules
+worth preserving: one control expanded at a time; compare is press-and-hold (`setShowOriginal`),
+never a toggle; and nothing blocks the UI except a full-resolution export.
 
 ## Development Notes
 

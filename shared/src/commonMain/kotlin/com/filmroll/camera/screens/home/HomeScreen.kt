@@ -1,62 +1,46 @@
 package com.filmroll.camera.screens.home
 
-
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.material.rememberScaffoldState
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.rounded.AddPhotoAlternate
+import androidx.compose.material.icons.rounded.Compare
+import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.SaveAlt
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.SheetState
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,82 +48,94 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.graphics.decodeToImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import androidx.compose.ui.graphics.decodeToImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
-import coil3.request.CachePolicy
-import coil3.request.ImageRequest
-import coil3.request.crossfade
-import com.github.panpf.zoomimage.ZoomImage
-import com.github.panpf.zoomimage.compose.rememberZoomState
-
+import com.filmroll.camera.FilmLut
 import com.filmroll.camera.resources.Res
-import com.filmroll.camera.resources.film
-import com.filmroll.camera.resources.ic_film_bw
-import com.filmroll.camera.resources.ic_film_colorslide
-import com.filmroll.camera.resources.ic_film_fujixtransiii
-import com.filmroll.camera.resources.ic_film_negative_new
-import com.filmroll.camera.resources.ic_film_negative_old
-import com.filmroll.camera.resources.ic_film_instant_pro
-import com.filmroll.camera.resources.ic_film_negative_color
-import com.filmroll.camera.resources.ic_film_instant_consumer
-import com.filmroll.camera.resources.ic_film_print
-import com.filmroll.camera.resources.ic_image_add_24
-import com.filmroll.camera.resources.image_24
-
-import com.filmroll.camera.resources.select_image
-import com.filmroll.camera.resources.select_your_film
+import com.filmroll.camera.resources.action_change_photo
+import com.filmroll.camera.resources.action_choose_photo
+import com.filmroll.camera.resources.action_compare
+import com.filmroll.camera.resources.action_export
+import com.filmroll.camera.resources.action_reset
+import com.filmroll.camera.resources.badge_original
+import com.filmroll.camera.resources.category_favorites
+import com.filmroll.camera.resources.editor_tab_adjust
+import com.filmroll.camera.resources.editor_tab_film
+import com.filmroll.camera.resources.film_none
+import com.filmroll.camera.resources.home_empty_body
+import com.filmroll.camera.resources.home_empty_title
+import com.filmroll.camera.resources.no_favorites_body
+import com.filmroll.camera.resources.settings
+import com.filmroll.camera.resources.strip_browse
+import com.filmroll.camera.screens.settings.DefaultPickerType
+import com.filmroll.camera.screens.settings.SettingsScreen
+import com.filmroll.camera.theme.FilmrollTheme
+import com.filmroll.camera.theme.emphatic
+import com.filmroll.camera.theme.eyebrowTextStyle
+import com.filmroll.camera.theme.standard
+import com.filmroll.camera.util.supportedImageExtensions
+import com.filmroll.camera.view.ChromeIconButton
+import com.filmroll.camera.view.ChromePanel
+import com.filmroll.camera.view.FilmBrowserSheet
+import com.filmroll.camera.view.FilmStrip
+import com.filmroll.camera.view.FilmrollChip
+import com.filmroll.camera.view.InlineBusyIndicator
+import com.filmroll.camera.view.LutDownloadDialog
+import com.filmroll.camera.view.LutDownloadProgressDialog
+import com.filmroll.camera.view.ModifiedDot
+import com.filmroll.camera.view.ProgressDialog
+import com.filmroll.camera.view.SegmentedTabs
+import com.filmroll.camera.view.ToolSlider
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
-import com.filmroll.camera.FavoriteLut
-import com.filmroll.camera.FilmLut
-import com.filmroll.camera.data.source.network.GITHUB_BASE_URL
-import com.filmroll.camera.screens.settings.DefaultPickerType
-import com.filmroll.camera.screens.settings.SettingsScreen
-import com.filmroll.camera.util.getScreenHeight
-import com.filmroll.camera.util.getScreenWidth
-import com.filmroll.camera.util.supportedImageExtensions
-import com.filmroll.camera.view.AppScaffold
-import com.filmroll.camera.view.CenteredSettingsSlider
-import com.filmroll.camera.view.LutDownloadDialog
-import com.filmroll.camera.view.LutDownloadProgressDialog
-import com.filmroll.camera.view.ProgressDialog
-import com.filmroll.camera.view.SettingsSlider
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import com.filmroll.camera.util.THUMBNAILS_DIR
-import com.filmroll.camera.util.systemTemporaryPath
+import com.github.panpf.zoomimage.ZoomImage
+import com.github.panpf.zoomimage.compose.rememberZoomState
 
+/** Height reserved for the deck's swapping content, so switching modes doesn't resize it. */
+private val DECK_CONTENT_HEIGHT = 150.dp
 
-data class HomeScreen(
-    val userMessage: String = ""
-) : Screen {
+private enum class EditorMode { FILM, ADJUST }
+
+/**
+ * The editor.
+ *
+ * The photo owns the screen and the controls float over or under it. That is the
+ * whole idea, and it is the opposite of what this screen used to do — a fixed
+ * 360dp preview card at the top with nine always-visible sliders scrolling
+ * beneath it, so the thing being edited got about a third of the display and
+ * every adjustment was made while looking at a thumbnail.
+ *
+ * Three rules follow from it:
+ *  - Only one control is expanded at a time. Film *or* adjust, and within adjust,
+ *    one slider — chosen from a rail that shows at a glance which tools you've
+ *    already touched.
+ *  - Comparing is a press-and-hold, not a toggle. You cannot mis-set a button you
+ *    have to keep holding, and it keeps the before/after in the same instant.
+ *  - Nothing blocks except a full-resolution export.
+ */
+class HomeScreen : Screen {
 
     // Workaround for voyager#546: without a unique key the AndroidScreenLifecycleOwner
     // is reused across activity restarts and gets disposed mid-flight, causing the
@@ -149,884 +145,703 @@ data class HomeScreen(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val scope = rememberCoroutineScope()
-        val scaffoldState = rememberScaffoldState()
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
         val navigator = LocalNavigator.currentOrThrow
-        val snackbarHostState = remember { SnackbarHostState() }
-
         val vm = koinScreenModel<HomeScreenModel>()
-        val uiState by vm.uiState.collectAsState()
+        val state by vm.uiState.collectAsState()
+        val tokens = FilmrollTheme.tokens
+        val snackbarHostState = remember { SnackbarHostState() }
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-        val singleImagePicker = rememberFilePickerLauncher(
-            type = when (uiState.defaultPickerType) {
+        var mode by remember { mutableStateOf(EditorMode.FILM) }
+        var activeTool by remember { mutableStateOf(AdjustmentTool.EXPOSURE) }
+
+        // Strength only exists while a film is applied; drop back to a tool that
+        // still has something to control rather than showing a dead slider.
+        LaunchedEffect(state.selectedFilm) {
+            if (state.selectedFilm == null && activeTool == AdjustmentTool.STRENGTH) {
+                activeTool = AdjustmentTool.EXPOSURE
+            }
+        }
+
+        val imagePicker = rememberFilePickerLauncher(
+            type = when (state.defaultPickerType) {
                 DefaultPickerType.IMAGES -> PickerType.Image
                 DefaultPickerType.FILES -> PickerType.File(supportedImageExtensions.toList())
-            }, mode = PickerMode.Single, onResult = vm::onImagePickerResult
+            },
+            mode = PickerMode.Single,
+            onResult = vm::onImagePickerResult,
         )
 
+        state.userMessage?.let { message ->
+            LaunchedEffect(message) {
+                snackbarHostState.showSnackbar(message)
+                vm.snackbarMessageShown()
+            }
+        }
 
-        val homeScreenState = HomeUiState(
-            previewImage = uiState.previewImage,
-            previewToken = uiState.previewToken,
-            selectedFilm = uiState.selectedFilm,
-            isLoading = uiState.isLoading,
-            loadingMessage = uiState.loadingMessage,
-            loadingProgress = uiState.loadingProgress,
-            showBottomSheet = uiState.showBottomSheet,
-            filmLuts = uiState.filmLuts,
-            favoriteLuts = uiState.favoriteLuts,
-            userMessage = uiState.userMessage,
-            imageAdjustments = uiState.imageAdjustments,
-            showAdjustments = uiState.showAdjustments,
-            onRefresh = vm::refresh,
-            onImageChooseClick = singleImagePicker::launch,
-            onFilmBoxClick = vm::showFilmLutsBottomSheet,
-            onDismissRequest = vm::dismissFilmLutBottomSheet,
-            onItemClick = vm::selectFilmLut,
-            onVisibilityClick = vm::showOriginalImage,
-            onImageResetClick = vm::resetImage,
-            onSettingsClick = { navigator.push(SettingsScreen()) },
-            onImageExportClick = vm::exportImage,
-            snackbarMessageShown = vm::snackbarMessageShown,
-            onAddFavoriteClick = vm::addFavoriteFilm,
-            onRemoveFavoriteClick = vm::removeFavoriteFilm,
-            // Image adjustment handlers
-            onContrastChange = vm::adjustContrast,
-            onShadowsChange = vm::adjustShadows,
-            onHighlightsChange = vm::adjustHighlights,
-            onSaturationChange = vm::adjustSaturation,
-            onTemperatureChange = vm::adjustTemperature,
-            onExposureChange = vm::adjustExposure,
-            onGrainChange = vm::addGrain,
-            onChromaticAberrationChange = vm::addChromaticAberration,
-            onLutIntensityChange = vm::adjustLutIntensity,
-            showDownloadDialog = uiState.showDownloadDialog,
-            showDownloadProgress = uiState.showDownloadProgress,
-            downloadProgress = uiState.downloadProgress,
-            onDownloadLutsConfirm = vm::confirmDownloadLuts,
-            onDownloadLutsDismiss = vm::dismissDownloadDialog,
-            filmThumbnails = uiState.filmThumbnails
-        )
+        Box(modifier = Modifier.fillMaxSize().background(tokens.canvas)) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    if (state.hasImage) {
+                        PhotoCanvas(state = state)
+                    } else {
+                        WelcomePane(onChoosePhoto = imagePicker::launch)
+                    }
 
-        AppScaffold(
-            onVisibilityClick = homeScreenState.onVisibilityClick,
-            onImageChooseClick = homeScreenState.onImageChooseClick,
-            onImageResetClick = homeScreenState.onImageResetClick,
-            onSettingsClick = homeScreenState.onSettingsClick,
-            onImageExportClick = homeScreenState.onImageExportClick,
-            snackbarHostState = snackbarHostState
-        ) { innerPadding ->
-            HomeContent(
-                state = homeScreenState,
-                modifier = Modifier.padding(innerPadding)
+                    TopScrim()
+
+                    TopChrome(
+                        hasImage = state.hasImage,
+                        comparing = !state.showAdjustments,
+                        canReset = state.hasEdits,
+                        onPickImage = imagePicker::launch,
+                        onCompareChange = vm::setShowOriginal,
+                        onReset = vm::resetImage,
+                        onSettings = { navigator.push(SettingsScreen()) },
+                    )
+
+                    OriginalBadge(
+                        visible = !state.showAdjustments,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .statusBarsPadding()
+                            .padding(top = 66.dp),
+                    )
+                }
+
+                AnimatedVisibility(
+                    visible = state.hasImage,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    ControlDeck(
+                        state = state,
+                        mode = mode,
+                        onModeChange = { mode = it },
+                        activeTool = activeTool,
+                        onToolChange = { activeTool = it },
+                        onAdjust = vm::updateAdjustment,
+                        onSelectFilm = { film ->
+                            if (film == null) vm.clearFilmLut() else vm.selectFilmLut(film)
+                        },
+                        onToggleFavorite = vm::toggleFavorite,
+                        onSelectCategory = vm::selectCategory,
+                        onBrowseAll = vm::showBrowser,
+                        onExport = vm::exportImage,
+                    )
+                }
+            }
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 20.dp),
+            ) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    shape = RoundedCornerShape(16.dp),
+                    containerColor = MaterialTheme.colorScheme.inverseSurface,
+                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                )
+            }
+        }
+
+        if (state.showBrowser) {
+            FilmBrowserSheet(
+                films = state.filmLuts,
+                categories = state.categories,
+                favoriteNames = state.favoriteNames,
+                thumbnails = state.filmThumbnails,
+                selectedFilm = state.selectedFilm,
+                sheetState = sheetState,
+                onSelect = {
+                    vm.selectFilmLut(it)
+                    vm.dismissBrowser()
+                },
+                onToggleFavorite = vm::toggleFavorite,
+                onCategoryShown = vm::generateThumbnailsForCategory,
+                onDismiss = vm::dismissBrowser,
             )
         }
 
         LutDownloadDialog(
-            isVisible = homeScreenState.showDownloadDialog,
-            onDismiss = homeScreenState.onDownloadLutsDismiss,
-            onConfirm = homeScreenState.onDownloadLutsConfirm
+            isVisible = state.showDownloadDialog,
+            onDismiss = vm::dismissDownloadDialog,
+            onConfirm = vm::confirmDownloadLuts,
         )
 
         LutDownloadProgressDialog(
-            isVisible = homeScreenState.showDownloadProgress,
-            current = homeScreenState.downloadProgress.first,
-            total = homeScreenState.downloadProgress.second,
-            onDismiss = homeScreenState.onDownloadLutsDismiss
+            isVisible = state.showDownloadProgress,
+            current = state.downloadProgress.first,
+            total = state.downloadProgress.second,
+            onDismiss = vm::dismissDownloadDialog,
         )
 
-
-        FilmLutsListBottomSheet(
-            state = homeScreenState,
-            viewModel = vm,
-            sheetState = sheetState,
-        )
-
-        homeScreenState.userMessage?.let { message ->
-            LaunchedEffect(scaffoldState, vm, message) {
-                snackbarHostState.showSnackbar(message)
-                homeScreenState.snackbarMessageShown()
-            }
-        }
-
-        if (homeScreenState.isLoading) {
+        if (state.isLoading) {
             ProgressDialog(
-                loadingMessage = homeScreenState.loadingMessage,
-                progress = homeScreenState.loadingProgress,
+                loadingMessage = state.loadingMessage,
+                progress = state.loadingProgress,
             )
         }
     }
-
-    @Composable
-    private fun HomeContent(
-        state: HomeUiState,
-        modifier: Modifier = Modifier
-    ) {
-        val zoomState = rememberZoomState()
-        Column(modifier = modifier.padding(horizontal = 18.dp)) {
-            Spacer(modifier = Modifier.size(23.dp))
-            Box(modifier = Modifier.fillMaxWidth()) {
-                OutlinedCard(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .fillMaxWidth()
-                        .height(360.dp),
-                    shape = MaterialTheme.shapes.large,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = CardDefaults.outlinedCardBorder(),
-                    onClick = state.onImageChooseClick
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        state.previewImage?.let { bytes ->
-                            // Decode off the main thread; keep the previous painter visible
-                            // until the new one is ready so the toggle/preview swap stays smooth.
-                            var painter by remember { mutableStateOf<BitmapPainter?>(null) }
-                            LaunchedEffect(bytes) {
-                                painter = withContext(Dispatchers.Default) {
-                                    BitmapPainter(bytes.decodeToImageBitmap())
-                                }
-                            }
-                            painter?.let { p ->
-                                ZoomImage(
-                                    modifier = Modifier.fillMaxSize(),
-                                    zoomState = zoomState,
-                                    painter = p,
-                                    contentDescription = null,
-                                    scrollBar = null,
-                                )
-                            }
-                        } ?: IconButton(
-                            modifier = Modifier.align(Alignment.Center).size(150.dp),
-                            onClick = state.onImageChooseClick
-                        ) {
-                            Column {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_image_add_24),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(65.dp, 65.dp)
-                                        .align(Alignment.CenterHorizontally)
-                                )
-                                Text(
-                                    text = stringResource(Res.string.select_image),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .weight(weight = 1f, fill = false)
-            ) {
-                Spacer(modifier = Modifier.size(23.dp))
-                Divider(modifier = Modifier.padding(28.dp, 0.dp))
-                Spacer(modifier = Modifier.size(23.dp))
-                FilmLutBox(
-                    modifier = Modifier.fillMaxWidth(),
-                    selectedFilm = state.selectedFilm,
-                    onFilmBoxClick = state.onFilmBoxClick,
-                )
-                Spacer(modifier = Modifier.size(16.dp))
-
-                // Image adjustment sliders
-                AdjustmentsSection(
-                    state = state,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-        }
-    }
-
-    @Composable
-    private fun AdjustmentsSection(
-        state: HomeUiState,
-        modifier: Modifier = Modifier
-    ) {
-        Column(modifier = modifier) {
-            if (state.selectedFilm != null) {
-                SettingsSlider(
-                    name = "LUT Intensity",
-                    value = state.imageAdjustments.lutIntensity,
-                    onValueChange = state.onLutIntensityChange,
-                    range = 0f..200f,
-                    steps = 200
-                )
-            }
-            CenteredSettingsSlider(
-                name = "Exposure",
-                value = state.imageAdjustments.exposure,
-                onValueChange = state.onExposureChange,
-                range = -20f..20f,
-                steps = 1
-            )
-            CenteredSettingsSlider(
-                name = "Temperature",
-                value = state.imageAdjustments.temperature,
-                onValueChange = state.onTemperatureChange,
-                range = -20f..20f,
-                steps = 1
-            )
-            CenteredSettingsSlider(
-                name = "Contrast",
-                value = state.imageAdjustments.contrast,
-                onValueChange = state.onContrastChange,
-                range = -20f..20f,
-                steps = 1
-            )
-            CenteredSettingsSlider(
-                name = "Shadows",
-                value = state.imageAdjustments.shadows,
-                onValueChange = state.onShadowsChange,
-                range = -20f..20f,
-                steps = 1
-            )
-            CenteredSettingsSlider(
-                name = "Highlights",
-                value = state.imageAdjustments.highlights,
-                onValueChange = state.onHighlightsChange,
-                range = -20f..20f,
-                steps = 1
-            )
-            CenteredSettingsSlider(
-                name = "Saturation",
-                value = state.imageAdjustments.saturation,
-                onValueChange = state.onSaturationChange,
-                range = -20f..20f,
-                steps = 1
-            )
-            SettingsSlider(
-                name = "Grain",
-                value = state.imageAdjustments.grain,
-                onValueChange = state.onGrainChange,
-                range = 0f..10f,
-                steps = 20
-            )
-            SettingsSlider(
-                name = "Chromatic Aberration",
-                value = state.imageAdjustments.chromaticAberration,
-                onValueChange = state.onChromaticAberrationChange,
-                range = 0f..10f,
-                steps = 10
-            )
-        }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    private fun FilmLutsListBottomSheet(
-        state: HomeUiState,
-        viewModel: HomeScreenModel,
-        sheetState: SheetState,
-    ) {
-        val listState: LazyListState = rememberLazyListState()
-        val focusManager = LocalFocusManager.current
-
-        if (state.showBottomSheet == BottomSheetState.HIDDEN) return
-
-        LaunchedEffect(sheetState.currentValue) {
-            focusManager.clearFocus()
-        }
-
-        ModalBottomSheet(
-            onDismissRequest = {
-                focusManager.clearFocus()
-                state.onDismissRequest()
-            },
-            sheetState = sheetState,
-            dragHandle = {},
-            scrimColor = Color.Transparent,
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .imePadding()
-            ) {
-                FilmLutsList(
-                    state = state,
-                    viewModel = viewModel,
-                    listState = listState,
-                    filmLuts = state.filmLuts,
-                    favoriteLuts = state.favoriteLuts,
-                    selectedFilm = state.selectedFilm,
-                    onItemClick = {
-                        state.onItemClick(it)
-                        focusManager.clearFocus()
-                    },
-                    onAddFavoriteClick = state.onAddFavoriteClick,
-                    onRemoveFavoriteClick = state.onRemoveFavoriteClick,
-                    onDismissRequest = {
-                        focusManager.clearFocus()
-                        state.onDismissRequest()
-                    }
-                )
-            }
-        }
-    }
-
-
-    @Composable
-    private fun FilmLutBox(
-        modifier: Modifier = Modifier,
-        selectedFilm: FilmLut?,
-        onFilmBoxClick: () -> Unit
-    ) {
-        Box(modifier = modifier) {
-            OutlinedCard(
-                modifier = Modifier.align(Alignment.Center).fillMaxWidth().height(80.dp),
-                shape = MaterialTheme.shapes.large,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
-                border = CardDefaults.outlinedCardBorder(),
-                onClick = onFilmBoxClick
-            ) {
-
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = stringResource(Res.string.film),
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(horizontal = 0.dp, vertical = 2.dp)
-                    )
-
-                    Text(
-                        text = selectedFilm?.name ?: stringResource(Res.string.select_your_film),
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(horizontal = 0.dp, vertical = 2.dp)
-                    )
-                }
-            }
-
-        }
-    }
-
-
-    @OptIn(
-        ExperimentalFoundationApi::class,
-        ExperimentalMaterial3Api::class,
-        ExperimentalMaterialApi::class
-    )
-    @Composable
-    private fun FilmLutsList(
-        state: HomeUiState,
-        viewModel: HomeScreenModel,
-        listState: LazyListState,
-        filmLuts: List<FilmLut>,
-        favoriteLuts: List<FavoriteLut>,
-        selectedFilm: FilmLut?,
-        onItemClick: (film: FilmLut) -> Unit,
-        onAddFavoriteClick: (FilmLut) -> Unit,
-        onRemoveFavoriteClick: (FilmLut) -> Unit,
-        onDismissRequest: () -> Unit
-    ) {
-        var searchQuery by remember { mutableStateOf("") }
-        var isSearchActive by remember { mutableStateOf(false) }
-        var selectedGroup by remember { mutableStateOf<String?>(null) }
-        var tabsState by remember { mutableStateOf(0) }
-        val titles = listOf("All", "Favorites")
-
-        // Filter films based on search query and favorites tab
-        val filteredFilmLuts = filmLuts.filter {
-            (searchQuery.isEmpty() || it.name.contains(searchQuery, ignoreCase = true)) &&
-                    (tabsState != 1 || favoriteLuts.any { favorite -> favorite.name == it.name })
-        }
-
-        val favoriteFilms = filmLuts.filter { film ->
-            favoriteLuts.any { favorite -> favorite.name == film.name }
-        }
-        val sortedAndGrouped = filteredFilmLuts.groupBy { it.category }
-        val groupsList = sortedAndGrouped.keys.toList()
-
-        // Handle keyboard appearance
-        val focusRequester = remember { FocusRequester() }
-        val focusManager = LocalFocusManager.current
-
-        Column {
-            // Top bar with tabs and search
-            if (selectedGroup == null) {
-                if (isSearchActive) {
-                    SearchBar(
-                        query = searchQuery,
-                        onQueryChange = { searchQuery = it },
-                        onClose = {
-                            isSearchActive = false
-                            searchQuery = ""
-                            focusManager.clearFocus()
-                        },
-                        focusRequester = focusRequester
-                    )
-
-                    LaunchedEffect(isSearchActive) {
-                        if (isSearchActive) {
-                            delay(100) // Short delay to ensure the UI is ready
-                            focusRequester.requestFocus()
-                        }
-                    }
-                } else {
-                    CategoryTabsHeader(
-                        tabsState = tabsState,
-                        titles = titles,
-                        onTabSelected = { tabsState = it },
-                        onSearchClick = { isSearchActive = true },
-                        onDismissRequest = onDismissRequest
-                    )
-                }
-            } else {
-                // Group header with back button
-                GroupHeader(
-                    groupName = selectedGroup!!,
-                    onBackClick = { selectedGroup = null }
-                )
-            }
-
-            AnimatedContent(
-                targetState = Triple(selectedGroup, tabsState, isSearchActive),
-                label = "Content Animation"
-            ) { (targetGroup, currentTab, searching) ->
-                when {
-                    // Show search results in grid when search is active
-                    searching && searchQuery.isNotEmpty() -> {
-                        FilmsGrid(
-                            films = filteredFilmLuts,
-                            selectedFilm = selectedFilm,
-                            onItemClick = onItemClick,
-                            favoriteLuts = favoriteLuts,
-                            onAddFavoriteClick = onAddFavoriteClick,
-                            onRemoveFavoriteClick = onRemoveFavoriteClick,
-                            thumbnails = state.filmThumbnails
-                        )
-                    }
-                    // Show specific group films in grid
-                    targetGroup != null -> {
-                        // Generate thumbnails for the selected group when it's selected
-                        LaunchedEffect(targetGroup) {
-                            viewModel.generateThumbnailsForGroup(targetGroup)
-                        }
-
-                        FilmsGrid(
-                            films = sortedAndGrouped[targetGroup] ?: emptyList(),
-                            selectedFilm = selectedFilm,
-                            onItemClick = onItemClick,
-                            favoriteLuts = favoriteLuts,
-                            onAddFavoriteClick = onAddFavoriteClick,
-                            onRemoveFavoriteClick = onRemoveFavoriteClick,
-                            thumbnails = state.filmThumbnails
-                        )
-                    }
-                    // Show favorites tab
-                    currentTab == 1 -> {
-                        FilmsGrid(
-                            films = favoriteFilms,
-                            selectedFilm = selectedFilm,
-                            onItemClick = onItemClick,
-                            favoriteLuts = favoriteLuts,
-                            onAddFavoriteClick = onAddFavoriteClick,
-                            onRemoveFavoriteClick = onRemoveFavoriteClick,
-                            thumbnails = state.filmThumbnails
-                        )
-                    }
-                    // Show empty search results message
-                    searching && searchQuery.isEmpty() -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(getScreenHeight() * 0.45f),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Type to search for films",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    // Show categories list
-                    else -> {
-                        CategoriesList(
-                            groupsList = groupsList,
-                            sortedAndGrouped = sortedAndGrouped,
-                            onGroupClick = { selectedGroup = it },
-                            listState = listState
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun SearchBar(
-        query: String,
-        onQueryChange: (String) -> Unit,
-        onClose: () -> Unit,
-        focusRequester: FocusRequester
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onClose) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close search"
-                )
-            }
-
-            OutlinedTextField(
-                value = query,
-                onValueChange = onQueryChange,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 8.dp)
-                    .focusRequester(focusRequester),
-                placeholder = {
-                    Text(
-                        "Search films...",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-                },
-                singleLine = true,
-                colors = androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
-                    textColor = MaterialTheme.colorScheme.onSurface,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                ),
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                trailingIcon = {
-                    if (query.isNotEmpty()) {
-                        IconButton(onClick = { onQueryChange("") }) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Clear",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                },
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Search
-                ),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        // Close keyboard but keep search active
-                        focusRequester.freeFocus()
-                        //LocalFocusManager.current.clearFocus()
-                    }
-                )
-            )
-        }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    private fun CategoryTabsHeader(
-        tabsState: Int,
-        titles: List<String>,
-        onTabSelected: (Int) -> Unit,
-        onSearchClick: () -> Unit,
-        onDismissRequest: () -> Unit
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.background),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onDismissRequest) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close"
-                )
-            }
-
-            PrimaryTabRow(
-                selectedTabIndex = tabsState,
-                modifier = Modifier.weight(1f)
-            ) {
-                titles.forEachIndexed { index, title ->
-                    Tab(
-                        selected = tabsState == index,
-                        onClick = { onTabSelected(index) },
-                        text = {
-                            Text(
-                                text = title,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    )
-                }
-            }
-
-            IconButton(onClick = onSearchClick) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search"
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun GroupHeader(
-        groupName: String,
-        onBackClick: () -> Unit
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = onBackClick,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                    contentDescription = "Back",
-                    modifier = Modifier.rotate(180f)
-                )
-            }
-            Text(
-                text = groupName,
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-    }
-
-    @Composable
-    private fun FilmsGrid(
-        films: List<FilmLut>,
-        selectedFilm: FilmLut?,
-        onItemClick: (film: FilmLut) -> Unit,
-        favoriteLuts: List<FavoriteLut>,
-        onAddFavoriteClick: (FilmLut) -> Unit,
-        onRemoveFavoriteClick: (FilmLut) -> Unit,
-        thumbnails: Map<String, String>
-    ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(8.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(getScreenHeight() * 0.45f),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(count = films.size) { index ->
-                val film = films[index]
-                FilmItem(
-                    film = film,
-                    selectedFilm = selectedFilm,
-                    onItemClick = onItemClick,
-                    isFavorite = favoriteLuts.any { it.name == film.name },
-                    onFavoriteClick = {
-                        if (favoriteLuts.any { it.name == film.name }) {
-                            onRemoveFavoriteClick(film)
-                        } else {
-                            onAddFavoriteClick(film)
-                        }
-                    },
-                    thumbnails = thumbnails,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-    }
-
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    private fun CategoriesList(
-        groupsList: List<String>,
-        sortedAndGrouped: Map<String, List<FilmLut>>,
-        onGroupClick: (String) -> Unit,
-        listState: LazyListState
-    ) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .wrapContentHeight()
-                .height(getScreenHeight() * 0.45f)
-                .padding(bottom = 40.dp)
-        ) {
-            items(groupsList) { group ->
-                Surface(
-                    color = MaterialTheme.colorScheme.surface,
-                    onClick = { onGroupClick(group) }
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Image(
-                            painter = when (group) {
-                                "Print" -> painterResource(Res.drawable.ic_film_print)
-                                "Negative Old" -> painterResource(Res.drawable.ic_film_negative_old)
-                                "Negative New" -> painterResource(Res.drawable.ic_film_negative_new)
-                                "Bw" -> painterResource(Res.drawable.ic_film_bw)
-                                "Colorslide" -> painterResource(Res.drawable.ic_film_colorslide)
-                                "Fujixtransiii" -> painterResource(Res.drawable.ic_film_fujixtransiii)
-                                "Instant Pro" -> painterResource(Res.drawable.ic_film_instant_pro)
-                                "Negative Color" -> painterResource(Res.drawable.ic_film_negative_color)
-                                "Instant Consumer" -> painterResource(Res.drawable.ic_film_instant_consumer)
-                                else -> painterResource(Res.drawable.ic_film_print)
-                            },
-                            contentDescription = null,
-                            modifier = Modifier
-                                .height(80.dp)
-                                .width(80.dp),
-                        )
-                        Text(
-                            text = group,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-                        Spacer(Modifier.weight(1f))
-                        Text(
-                            text = sortedAndGrouped[group]?.size.toString(),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                            contentDescription = "enter",
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    fun FilmItem(
-        film: FilmLut,
-        selectedFilm: FilmLut?,
-        onItemClick: (film: FilmLut) -> Unit,
-        isFavorite: Boolean,
-        onFavoriteClick: () -> Unit,
-        thumbnails: Map<String, String> = emptyMap(),
-        modifier: Modifier = Modifier
-    ) {
-        val isSelected = film == selectedFilm
-        val cardBorderColor = if (isSelected)
-            MaterialTheme.colorScheme.primary
-        else
-            MaterialTheme.colorScheme.surfaceVariant
-
-        OutlinedCard(
-            modifier = modifier
-                .height(getScreenHeight() * 0.25f)
-                .padding(4.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .border(
-                    BorderStroke(
-                        width = if (isSelected) 2.dp else 1.dp,
-                        color = cardBorderColor
-                    )
-                ),
-            colors = CardDefaults.outlinedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            onClick = { onItemClick(film) }
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp))
-
-            ) {
-                // Thumbnail container
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(4f)
-                ) {
-                    // Use the thumbnail if available, otherwise fall back to the GitHub image
-                    val thumbnailPath = thumbnails[film.lut_name]
-                    if (thumbnailPath.isNullOrEmpty().not()) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalPlatformContext.current)
-                                .data("$systemTemporaryPath/$THUMBNAILS_DIR/$thumbnailPath")
-                                .crossfade(true)
-                                .memoryCachePolicy(CachePolicy.DISABLED)
-                                .diskCachePolicy(CachePolicy.DISABLED)
-                                .build(),
-                            placeholder = painterResource(Res.drawable.image_24),
-                            fallback = painterResource(Res.drawable.image_24),
-                            error = painterResource(Res.drawable.image_24),
-                            contentDescription = film.name,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp))
-
-                        )
-                    } else {
-                        // Fallback to GitHub image
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalPlatformContext.current)
-                                .data("${GITHUB_BASE_URL}${film.image_url}")
-                                .crossfade(true)
-                                .memoryCachePolicy(CachePolicy.ENABLED)
-                                .diskCachePolicy(CachePolicy.ENABLED)
-                                .build(),
-                            contentDescription = film.name,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
-                    // Favorite button overlaid on the top right of the image
-                    IconButton(
-                        onClick = onFavoriteClick,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(18.dp)
-                            .size(22.dp)
-                            .background(
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-                                RoundedCornerShape(12.dp)
-                            )
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(18.dp),
-                            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
-                            tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-
-                // Film name
-                Box(
-                    modifier = Modifier.weight(1F).clip(RoundedCornerShape(12.dp))
-                ) {
-                    Text(
-                        text = film.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-    }
-
 }
 
+// ---------------------------------------------------------------------- canvas
+
+/**
+ * The photo. Decoding happens off the main thread and the previous frame is held
+ * on screen until the new one is ready, so dragging a slider re-renders without
+ * the canvas ever flashing empty.
+ */
+@Composable
+private fun PhotoCanvas(state: HomeUiState, modifier: Modifier = Modifier) {
+    val zoomState = rememberZoomState()
+    var painter by remember { mutableStateOf<BitmapPainter?>(null) }
+
+    LaunchedEffect(state.previewToken) {
+        val bytes = state.previewImage ?: return@LaunchedEffect
+        painter = withContext(Dispatchers.Default) {
+            BitmapPainter(bytes.decodeToImageBitmap())
+        }
+    }
+
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        painter?.let {
+            ZoomImage(
+                modifier = Modifier.fillMaxSize(),
+                zoomState = zoomState,
+                painter = it,
+                contentDescription = null,
+                scrollBar = null,
+            )
+        }
+    }
+}
+
+/** Keeps the top chrome legible over a bright sky without dimming the whole photo. */
+@Composable
+private fun TopScrim() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(150.dp)
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color.Black.copy(alpha = 0.42f), Color.Transparent),
+                ),
+            ),
+    )
+}
+
+@Composable
+private fun TopChrome(
+    hasImage: Boolean,
+    comparing: Boolean,
+    canReset: Boolean,
+    onPickImage: () -> Unit,
+    onCompareChange: (Boolean) -> Unit,
+    onReset: () -> Unit,
+    onSettings: () -> Unit,
+) {
+    val tokens = FilmrollTheme.tokens
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (hasImage) {
+            ChromeIconButton(
+                onClick = onPickImage,
+                imageVector = Icons.Rounded.PhotoLibrary,
+                contentDescription = stringResource(Res.string.action_change_photo),
+                tint = tokens.onCanvas,
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        if (hasImage) {
+            HoldToCompareButton(active = comparing, onActiveChange = onCompareChange)
+            Spacer(modifier = Modifier.width(8.dp))
+            ChromeIconButton(
+                onClick = onReset,
+                imageVector = Icons.Rounded.Restore,
+                contentDescription = stringResource(Res.string.action_reset),
+                tint = tokens.onCanvas,
+                enabled = canReset,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+
+        ChromeIconButton(
+            onClick = onSettings,
+            imageVector = Icons.Rounded.Settings,
+            contentDescription = stringResource(Res.string.settings),
+            tint = tokens.onCanvas,
+        )
+    }
+}
+
+/**
+ * Press and hold to see the untouched photo.
+ *
+ * A toggle would be cheaper to build and worse to use: you can leave a toggle in
+ * the wrong state and spend a minute editing the original by mistake, and you
+ * lose the direct A/B that only works when both states are a fraction of a
+ * second apart.
+ */
+@Composable
+private fun HoldToCompareButton(
+    active: Boolean,
+    onActiveChange: (Boolean) -> Unit,
+) {
+    val tokens = FilmrollTheme.tokens
+    val scale by animateFloatAsState(
+        targetValue = if (active) 0.92f else 1f,
+        animationSpec = emphatic(),
+        label = "compareScale",
+    )
+    val background by animateColorAsState(
+        targetValue = if (active) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+        } else {
+            tokens.onCanvas.copy(alpha = 0.10f)
+        },
+        animationSpec = standard(),
+        label = "compareBackground",
+    )
+    val tint by animateColorAsState(
+        targetValue = if (active) MaterialTheme.colorScheme.onPrimary else tokens.onCanvas,
+        animationSpec = standard(),
+        label = "compareTint",
+    )
+
+    Box(
+        modifier = Modifier
+            .scale(scale)
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(background)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        onActiveChange(true)
+                        tryAwaitRelease()
+                        onActiveChange(false)
+                    },
+                )
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.Compare,
+            contentDescription = stringResource(Res.string.action_compare),
+            tint = tint,
+            modifier = Modifier.size(21.dp),
+        )
+    }
+}
+
+/** Says out loud which of the two images you are currently looking at. */
+@Composable
+private fun OriginalBadge(visible: Boolean, modifier: Modifier = Modifier) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(standard()),
+        exit = fadeOut(standard()),
+        modifier = modifier,
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(horizontal = 14.dp, vertical = 6.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.badge_original),
+                style = eyebrowTextStyle,
+                color = MaterialTheme.colorScheme.onPrimary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun WelcomePane(onChoosePhoto: () -> Unit, modifier: Modifier = Modifier) {
+    val tokens = FilmrollTheme.tokens
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(96.dp)
+                .clip(RoundedCornerShape(30.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.AddPhotoAlternate,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(40.dp),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        Text(
+            text = stringResource(Res.string.home_empty_title),
+            style = MaterialTheme.typography.headlineSmall,
+            color = tokens.onCanvas,
+            textAlign = TextAlign.Center,
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            text = stringResource(Res.string.home_empty_body),
+            style = MaterialTheme.typography.bodyMedium,
+            color = tokens.onCanvasVariant,
+            textAlign = TextAlign.Center,
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Row(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .clickable(onClick = onChoosePhoto)
+                .padding(horizontal = 26.dp, vertical = 15.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.PhotoLibrary,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(18.dp),
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = stringResource(Res.string.action_choose_photo),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onPrimary,
+            )
+        }
+    }
+}
+
+// ------------------------------------------------------------------------ deck
+
+@Composable
+private fun ControlDeck(
+    state: HomeUiState,
+    mode: EditorMode,
+    onModeChange: (EditorMode) -> Unit,
+    activeTool: AdjustmentTool,
+    onToolChange: (AdjustmentTool) -> Unit,
+    onAdjust: (AdjustmentTool, Float) -> Unit,
+    onSelectFilm: (FilmLut?) -> Unit,
+    onToggleFavorite: (FilmLut) -> Unit,
+    onSelectCategory: (String?) -> Unit,
+    onBrowseAll: () -> Unit,
+    onExport: () -> Unit,
+) {
+    val tokens = FilmrollTheme.tokens
+
+    ChromePanel(
+        modifier = Modifier.fillMaxWidth(),
+        chromeColor = tokens.chrome,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(top = 14.dp, bottom = 12.dp),
+        ) {
+            Box(modifier = Modifier.fillMaxWidth().height(2.dp)) {
+                if (state.isApplyingFilm || state.isCatalogLoading) {
+                    InlineBusyIndicator(color = MaterialTheme.colorScheme.primary)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SegmentedTabs(
+                    options = listOf(
+                        stringResource(Res.string.editor_tab_film),
+                        stringResource(Res.string.editor_tab_adjust),
+                    ),
+                    selectedIndex = mode.ordinal,
+                    onSelect = { onModeChange(EditorMode.entries[it]) },
+                    modifier = Modifier.weight(1f),
+                    trackColor = tokens.onCanvas.copy(alpha = 0.08f),
+                    thumbColor = tokens.onCanvas.copy(alpha = 0.16f),
+                    selectedTextColor = tokens.onCanvas,
+                    unselectedTextColor = tokens.onCanvasVariant,
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                ExportButton(onClick = onExport)
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            AnimatedContent(
+                targetState = mode,
+                transitionSpec = { fadeIn(standard()) togetherWith fadeOut(standard()) },
+                modifier = Modifier.fillMaxWidth().height(DECK_CONTENT_HEIGHT),
+                label = "deckMode",
+            ) { current ->
+                when (current) {
+                    EditorMode.FILM -> FilmPane(
+                        state = state,
+                        onSelectFilm = onSelectFilm,
+                        onToggleFavorite = onToggleFavorite,
+                        onSelectCategory = onSelectCategory,
+                        onBrowseAll = onBrowseAll,
+                    )
+
+                    EditorMode.ADJUST -> AdjustPane(
+                        state = state,
+                        activeTool = activeTool,
+                        onToolChange = onToolChange,
+                        onAdjust = onAdjust,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExportButton(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 18.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.SaveAlt,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.size(17.dp),
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = stringResource(Res.string.action_export),
+            style = eyebrowTextStyle,
+            color = MaterialTheme.colorScheme.onPrimary,
+        )
+    }
+}
+
+@Composable
+private fun FilmPane(
+    state: HomeUiState,
+    onSelectFilm: (FilmLut?) -> Unit,
+    onToggleFavorite: (FilmLut) -> Unit,
+    onSelectCategory: (String?) -> Unit,
+    onBrowseAll: () -> Unit,
+) {
+    val tokens = FilmrollTheme.tokens
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            item(key = "__favorites__") {
+                FilmrollChip(
+                    label = stringResource(Res.string.category_favorites),
+                    selected = state.selectedCategory == null,
+                    onClick = { onSelectCategory(null) },
+                    selectedColor = MaterialTheme.colorScheme.primary,
+                    unselectedColor = tokens.onCanvas.copy(alpha = 0.08f),
+                    selectedTextColor = MaterialTheme.colorScheme.onPrimary,
+                    unselectedTextColor = tokens.onCanvasVariant,
+                )
+            }
+            items(state.categories.size, key = { state.categories[it] }) { index ->
+                val category = state.categories[index]
+                FilmrollChip(
+                    label = category,
+                    selected = state.selectedCategory == category,
+                    onClick = { onSelectCategory(category) },
+                    selectedColor = MaterialTheme.colorScheme.primary,
+                    unselectedColor = tokens.onCanvas.copy(alpha = 0.08f),
+                    selectedTextColor = MaterialTheme.colorScheme.onPrimary,
+                    unselectedTextColor = tokens.onCanvasVariant,
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        if (state.stripFilms.isEmpty() && state.selectedCategory == null) {
+            Box(
+                modifier = Modifier.fillMaxWidth().height(94.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(Res.string.no_favorites_body),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = tokens.onCanvasVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 40.dp),
+                )
+            }
+        } else {
+            FilmStrip(
+                films = state.stripFilms,
+                thumbnails = state.filmThumbnails,
+                selectedFilm = state.selectedFilm,
+                favoriteNames = state.favoriteNames,
+                onSelect = onSelectFilm,
+                onToggleFavorite = onToggleFavorite,
+                onBrowseAll = onBrowseAll,
+                originalLabel = stringResource(Res.string.film_none),
+                browseLabel = stringResource(Res.string.strip_browse),
+                accentColor = MaterialTheme.colorScheme.primary,
+                onCanvasColor = tokens.onCanvas,
+                onCanvasVariantColor = tokens.onCanvasVariant,
+                favoriteColor = tokens.safelight,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun AdjustPane(
+    state: HomeUiState,
+    activeTool: AdjustmentTool,
+    onToolChange: (AdjustmentTool) -> Unit,
+    onAdjust: (AdjustmentTool, Float) -> Unit,
+) {
+    val tokens = FilmrollTheme.tokens
+    val tools = AdjustmentTool.entries.filter { !it.requiresFilm || state.selectedFilm != null }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        ToolSlider(
+            label = stringResource(activeTool.labelRes),
+            value = activeTool.read(state.imageAdjustments),
+            valueRange = activeTool.range,
+            defaultValue = activeTool.neutral,
+            onValueChange = { onAdjust(activeTool, it) },
+            valueLabel = activeTool::format,
+            accentColor = MaterialTheme.colorScheme.primary,
+            onCanvasColor = tokens.onCanvas,
+            onCanvasVariantColor = tokens.onCanvasVariant,
+            resetContentDescription = stringResource(Res.string.action_reset),
+            modifier = Modifier.padding(horizontal = 20.dp),
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            items(tools.size, key = { tools[it].name }) { index ->
+                val tool = tools[index]
+                ToolRailItem(
+                    tool = tool,
+                    selected = tool == activeTool,
+                    modified = tool.isModified(state.imageAdjustments),
+                    onClick = { onToolChange(tool) },
+                )
+            }
+        }
+    }
+}
+
+/**
+ * One entry on the adjust rail. The dot is the point of it: without a marker, a
+ * collapsed rail hides which of nine tools you have already moved, and the only
+ * way to find out is to open each one.
+ */
+@Composable
+private fun ToolRailItem(
+    tool: AdjustmentTool,
+    selected: Boolean,
+    modified: Boolean,
+    onClick: () -> Unit,
+) {
+    val tokens = FilmrollTheme.tokens
+    val accent = MaterialTheme.colorScheme.primary
+
+    val background by animateColorAsState(
+        targetValue = if (selected) accent.copy(alpha = 0.18f) else Color.Transparent,
+        animationSpec = standard(),
+        label = "toolBackground",
+    )
+    val contentColor by animateColorAsState(
+        targetValue = if (selected) accent else tokens.onCanvasVariant,
+        animationSpec = standard(),
+        label = "toolContent",
+    )
+
+    Column(
+        modifier = Modifier
+            .width(64.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(CircleShape)
+                .background(background),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = tool.icon,
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier.size(19.dp),
+            )
+            ModifiedDot(
+                visible = modified && !selected,
+                color = accent,
+                modifier = Modifier.align(Alignment.TopEnd).padding(top = 3.dp, end = 3.dp),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            // A touch smaller than the standard eyebrow: the rail has nine entries
+            // and the longest labels need to survive at 64dp without truncating.
+            text = stringResource(tool.labelRes),
+            style = eyebrowTextStyle.copy(fontSize = 9.sp, letterSpacing = 0.4.sp),
+            color = contentColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+        )
+    }
+}

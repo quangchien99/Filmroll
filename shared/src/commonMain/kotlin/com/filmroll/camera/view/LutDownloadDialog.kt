@@ -4,42 +4,38 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CloudDownload
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.filmroll.camera.resources.Res
+import com.filmroll.camera.resources.action_download
+import com.filmroll.camera.resources.action_later
+import com.filmroll.camera.resources.download_luts
+import com.filmroll.camera.resources.download_luts_message
+import com.filmroll.camera.resources.downloading_luts
+import com.filmroll.camera.resources.downloading_luts_count
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun LutDownloadDialog(
     isVisible: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
 ) {
     if (!isVisible) return
 
-    AlertDialog(
+    AppDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Download LUT Files") },
-        text = {
-            Text(
-                "Would you like to download all film LUT files now? " +
-                        "This will allow you to apply filters even when offline."
-            )
-        },
-        confirmButton = {
-            Button(onClick = onConfirm) {
-                Text("Download")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Later")
-            }
-        }
+        icon = Icons.Rounded.CloudDownload,
+        title = stringResource(Res.string.download_luts),
+        message = stringResource(Res.string.download_luts_message),
+        confirmLabel = stringResource(Res.string.action_download),
+        onConfirm = onConfirm,
+        dismissLabel = stringResource(Res.string.action_later),
     )
 }
 
@@ -48,23 +44,25 @@ fun LutDownloadProgressDialog(
     isVisible: Boolean,
     current: Int,
     total: Int,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     if (!isVisible) return
 
-    AlertDialog(
+    AppDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Downloading LUT Files") },
-        text = {
-            Column {
-                Text("Downloading LUT files: $current of $total")
-                Spacer(modifier = Modifier.height(8.dp))
-                LinearProgressIndicator(
-                    progress = { current.toFloat() / total },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {}
-    )
+        icon = Icons.Rounded.CloudDownload,
+        title = stringResource(Res.string.downloading_luts),
+        dismissOnOutsideClick = false,
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(Res.string.downloading_luts_count, current, total),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            DeterminateBar(fraction = if (total > 0) current.toFloat() / total else 0f)
+        }
+    }
 }

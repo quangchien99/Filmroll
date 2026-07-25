@@ -3,6 +3,7 @@ package com.filmroll.camera.screens.onboarding
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,12 +21,9 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -49,6 +46,8 @@ import com.filmroll.camera.resources.action_get_started
 import com.filmroll.camera.resources.action_next
 import com.filmroll.camera.resources.action_skip
 import com.filmroll.camera.screens.home.HomeScreen
+import com.filmroll.camera.theme.emphatic
+import com.filmroll.camera.theme.standard
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -78,10 +77,9 @@ class OnboardingScreen : Screen {
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.surfaceContainerLowest,
-                            MaterialTheme.colorScheme.surfaceContainer,
-                        ),
+                        0f to MaterialTheme.colorScheme.surface,
+                        0.65f to MaterialTheme.colorScheme.surfaceContainerLow,
+                        1f to MaterialTheme.colorScheme.surfaceContainer,
                     ),
                 ),
         ) {
@@ -95,24 +93,24 @@ class OnboardingScreen : Screen {
                     OnboardingPageContent(page = pages[index])
                 }
 
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    tonalElevation = 3.dp,
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 28.dp, vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(28.dp),
                 ) {
-                    Column(
+                    PageIndicator(
+                        pageCount = pages.size,
+                        currentPage = pagerState.currentPage,
+                    )
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .navigationBarsPadding()
-                            .padding(horizontal = 32.dp, vertical = 24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(24.dp),
-                    ) {
-                        PageIndicator(
-                            pageCount = pages.size,
-                            currentPage = pagerState.currentPage,
-                        )
-                        Button(
-                            onClick = {
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                            .clickable {
                                 if (isLastPage) {
                                     vm.finishOnboarding()
                                 } else {
@@ -120,29 +118,36 @@ class OnboardingScreen : Screen {
                                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
                                     }
                                 }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(
-                                text = stringResource(
-                                    if (isLastPage) Res.string.action_get_started else Res.string.action_next
-                                ),
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                        }
+                            }
+                            .padding(vertical = 17.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if (isLastPage) Res.string.action_get_started else Res.string.action_next,
+                            ),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                        )
                     }
                 }
             }
 
             if (!isLastPage) {
-                TextButton(
-                    onClick = vm::finishOnboarding,
+                Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .statusBarsPadding()
-                        .padding(8.dp),
+                        .padding(12.dp)
+                        .clip(CircleShape)
+                        .clickable(onClick = vm::finishOnboarding)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                 ) {
-                    Text(stringResource(Res.string.action_skip))
+                    Text(
+                        text = stringResource(Res.string.action_skip),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }
@@ -154,34 +159,35 @@ private fun OnboardingPageContent(page: OnboardingPage) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp),
+            .padding(horizontal = 36.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Surface(
-            modifier = Modifier.size(200.dp),
-            shape = RoundedCornerShape(40.dp),
-            color = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        Box(
+            modifier = Modifier
+                .size(196.dp)
+                .clip(RoundedCornerShape(52.dp))
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(page.illustration),
                 contentDescription = null,
-                modifier = Modifier.padding(48.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(92.dp),
             )
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(44.dp))
 
         Text(
             text = stringResource(page.title),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface,
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         Text(
             text = stringResource(page.description),
@@ -192,6 +198,11 @@ private fun OnboardingPageContent(page: OnboardingPage) {
     }
 }
 
+/**
+ * The current page's pip stretches into a bar rather than just changing colour —
+ * position within a short sequence is easier to read as a length than as a tint,
+ * especially at a glance while swiping.
+ */
 @Composable
 private fun PageIndicator(pageCount: Int, currentPage: Int) {
     Row(
@@ -201,15 +212,17 @@ private fun PageIndicator(pageCount: Int, currentPage: Int) {
         repeat(pageCount) { index ->
             val selected = index == currentPage
             val width by animateDpAsState(
-                targetValue = if (selected) 24.dp else 8.dp,
+                targetValue = if (selected) 28.dp else 8.dp,
+                animationSpec = emphatic(),
                 label = "indicatorWidth",
             )
             val color by animateColorAsState(
                 targetValue = if (selected) {
                     MaterialTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                 },
+                animationSpec = standard(),
                 label = "indicatorColor",
             )
             Box(

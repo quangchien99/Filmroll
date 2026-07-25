@@ -11,9 +11,14 @@ metadata.
 
 ## Features
 
-- Apply film-like 3D LUTs to any photo, with a thumbnail preview generated per LUT.
-- Fine-tune exposure, contrast, shadows, highlights, saturation, temperature and grain.
-- Favourite the looks you keep coming back to.
+- Full-bleed editor: the photo owns the screen and the controls float over and under it.
+- A live film strip under the image — every tile is *your* photo rendered through that stock, so
+  switching between looks is one tap with the picture still in view.
+- Fine-tune exposure, contrast, shadows, highlights, saturation, warmth, grain and fringing, one
+  tool at a time, with a rail that marks which ones you've already touched.
+- Press and hold to see the original; release to go back.
+- Favourite the looks you keep coming back to — press and hold any film to pin it.
+- Searchable film library with category filters.
 - Download the full LUT library for offline use.
 - Export as JPEG, or in the source format with EXIF metadata preserved.
 - First-run flow: **splash → language → onboarding → home**.
@@ -51,7 +56,9 @@ Everything lives under the `com.filmroll.camera` package.
 | `screens/splash` | Cold-start branding; decides the first destination |
 | `screens/language` | Language picker — first-run step and Settings entry |
 | `screens/onboarding` | Three-page intro pager |
-| `screens/home` | Image picking, LUT selection, adjustments, export |
+| `screens/home` | The editor: canvas, film strip, adjust rail, export |
+| `theme/` | The "Darkroom" design system — palette, type scale, tokens, motion |
+| `view/` | Shared UI: tool slider, film strip, browser sheet, chrome, settings rows |
 | `screens/settings` | Appearance, language, notifications, export options, debug tools |
 | `data/source/FilmRepository` | LUT data from the local DB and the network |
 | `data/source/local/SettingsStorage` | Key-value preferences, including the onboarding flags |

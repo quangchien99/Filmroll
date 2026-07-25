@@ -13,6 +13,17 @@ import com.filmroll.camera.data.source.toFavoriteLut
 import com.filmroll.camera.image.ImageAdjustments
 import com.filmroll.camera.image.SkiaImageProcessor
 import com.filmroll.camera.lut.LutDownloadManager
+import com.filmroll.camera.resources.Res
+import com.filmroll.camera.resources.loading_exporting
+import com.filmroll.camera.resources.loading_saving
+import com.filmroll.camera.resources.msg_catalog_refresh_failed
+import com.filmroll.camera.resources.msg_choose_image_first
+import com.filmroll.camera.resources.msg_export_failed
+import com.filmroll.camera.resources.msg_export_success
+import com.filmroll.camera.resources.msg_favorite_added
+import com.filmroll.camera.resources.msg_favorite_removed
+import com.filmroll.camera.resources.msg_film_load_failed
+import com.filmroll.camera.resources.msg_unsupported_image
 import com.filmroll.camera.screens.settings.DefaultPickerType
 import com.filmroll.camera.util.AppContext
 import com.filmroll.camera.util.convertImageToJpeg
@@ -31,6 +42,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.getString
 import org.koin.dsl.module
 import com.filmroll.camera.util.EDITED_IMAGE_FILE_NAME
 import com.filmroll.camera.util.IMAGE_FILE_NAME
@@ -64,70 +76,72 @@ private val formatsNeedingConversion = setOf(
 private const val PREVIEW_QUALITY = 80
 
 /**
- * UiState for the Main Screen
+ * State of the editor.
+ *
+ * Data only — the screen wires its own callbacks straight to the model rather than
+ * carrying a second copy of this class stuffed with lambdas, which is what the
+ * previous version did and which meant every keystroke of UI wiring had to be
+ * declared in three places.
  */
 data class HomeUiState(
     val previewImage: ByteArray? = null,
     val previewToken: Long = 0L,
+    val hasImage: Boolean = false,
     val selectedFilm: FilmLut? = null,
+    /** Non-null while a blocking task (export) owns the screen. */
     val isLoading: Boolean = false,
     val loadingMessage: String = "",
     /**
      * 0..1 progress for the loading dialog. When null, the dialog falls back
      * to its indeterminate spinner; when set, it renders a linear progress
      * bar driven by this value. Only the export path populates this — other
-     * loading states (refresh, LUT load) leave it null.
+     * loading states leave it null.
      */
     val loadingProgress: Float? = null,
-    val showBottomSheet: BottomSheetState = BottomSheetState.HIDDEN,
+    /** True while the catalogue is being fetched. Shown inline, never blocking. */
+    val isCatalogLoading: Boolean = false,
+    /** True while a LUT is being fetched for the strip. Shown inline, never blocking. */
+    val isApplyingFilm: Boolean = false,
     val defaultPickerType: DefaultPickerType = DefaultPickerType.IMAGES,
     val filmLuts: List<FilmLut> = emptyList(),
     val favoriteLuts: List<FavoriteLut> = emptyList(),
+    val categories: List<String> = emptyList(),
+    /** Category feeding the film strip. `null` means the favourites shelf. */
+    val selectedCategory: String? = null,
     val userMessage: String? = null,
+    /** False only while the user is holding the compare button. */
     val showAdjustments: Boolean = true,
     val imageAdjustments: ImageAdjustments = ImageAdjustments(),
-    val onRefresh: () -> Unit = {},
-    val onImageChooseClick: () -> Unit = {},
-    val onFilmBoxClick: () -> Unit = {},
-    val onDismissRequest: () -> Unit = {},
-    val onItemClick: (film: FilmLut) -> Unit = {},
-    val onVisibilityClick: (Boolean) -> Unit = {},
-    val onImageResetClick: () -> Unit = {},
-    val onSettingsClick: () -> Unit = {},
-    val onImageExportClick: () -> Unit = {},
-    val snackbarMessageShown: () -> Unit = {},
-    val onAddFavoriteClick: (FilmLut) -> Unit = {},
-    val onRemoveFavoriteClick: (FilmLut) -> Unit = {},
-    // Individual adjustment handlers
-    val onContrastChange: (Float) -> Unit = {},
-    val onShadowsChange: (Float) -> Unit = {},
-    val onHighlightsChange: (Float) -> Unit = {},
-    val onSaturationChange: (Float) -> Unit = {},
-    val onTemperatureChange: (Float) -> Unit = {},
-    val onExposureChange: (Float) -> Unit = {},
-    val onGrainChange: (Float) -> Unit = {},
-    val onChromaticAberrationChange: (Float) -> Unit = {},
-    val onLutIntensityChange: (Float) -> Unit = {},
+    val showBrowser: Boolean = false,
     val showDownloadDialog: Boolean = false,
     val showDownloadProgress: Boolean = false,
     val downloadProgress: Pair<Int, Int> = 0 to 0,
-    val onDownloadLutsConfirm: () -> Unit = {},
-    val onDownloadLutsDismiss: () -> Unit = {},
     val filmThumbnails: Map<String, String> = emptyMap(),
-    )
+) {
+    // Lazy rather than `get()`: the editor recomposes on every preview frame, and
+    // these two filter the whole catalogue. Computing them once per state instance
+    // keeps a slider drag from re-scanning a few hundred LUTs each frame.
+    val favoriteNames: Set<String> by lazy { favoriteLuts.mapTo(mutableSetOf()) { it.name } }
 
-enum class BottomSheetState {
-    COLLAPSED, EXPANDED, HIDDEN
+    /** Films shown in the strip for the current shelf. */
+    val stripFilms: List<FilmLut> by lazy {
+        when (val category = selectedCategory) {
+            null -> filmLuts.filter { it.name in favoriteNames }
+            else -> filmLuts.filter { it.category == category }
+        }
+    }
+
+    val hasEdits: Boolean get() = selectedFilm != null || imageAdjustments.hasAdjustments()
 }
 
 /**
- * ViewModel for the Main Screen.
+ * ViewModel for the editor.
  *
  * Preview pipeline: the screen model holds the decoded source image bytes and the
  * currently selected LUT bytes. Every change to either (or to [ImageAdjustments])
  * triggers a debounced re-render through [SkiaImageProcessor] at a preview-friendly
  * resolution; the resulting JPEG bytes are pushed into [HomeUiState.previewImage]
- * for Coil to display. Export reuses the same processor at full resolution.
+ * for the canvas to display. Export reuses the same processor at full resolution.
  */
 data class HomeScreenModel(
     val repository: FilmRepository,
@@ -146,6 +160,10 @@ data class HomeScreenModel(
     private var currentLutBytes: ByteArray? = null
     private var currentAdjustments: ImageAdjustments = ImageAdjustments()
     private var currentThumbnailJob: Job? = null
+
+    /** Guards the one-time pick of an opening shelf — see [refresh]. */
+    private var shelfInitialized = false
+
     /** Filename in app cache holding the user's unmodified original picked image, with original extension. */
     private var originalImageFileName: String? = null
 
@@ -173,219 +191,254 @@ data class HomeScreenModel(
         startPreviewLoop()
     }
 
-
     private fun updateUiState(update: (HomeUiState) -> HomeUiState) {
         _uiState.value = update(_uiState.value)
     }
 
-
+    /**
+     * Pulls the catalogue. Deliberately non-blocking: this runs on every cold start,
+     * and a modal spinner over an empty editor made the app feel like it was booting
+     * rather than ready. Failures are worth a word; success is not.
+     */
     fun refresh() {
         screenModelScope.launch {
             try {
-                updateUiState { it.copy(isLoading = true, loadingMessage = "Refreshing data...") }
+                updateUiState { it.copy(isCatalogLoading = true) }
                 if (konnectivity.isConnected) {
                     repository.refresh()
                 }
-                val newFilmList = repository.getFilmsStream().first()
-                val newFavoriteList = repository.getFavoriteFilmsStream().first()
+                val films = repository.getFilmsStream().first()
+                val favorites = repository.getFavoriteFilmsStream().first()
+                val categories = films.map { it.category }.distinct().sorted()
+                // Land on favourites when there are some, otherwise the first shelf — an
+                // empty strip on first run would look broken. Only ever chosen once:
+                // `null` is a real shelf (favourites), so this can't be an elvis default.
+                val shelf = if (shelfInitialized) {
+                    _uiState.value.selectedCategory
+                } else {
+                    shelfInitialized = true
+                    if (favorites.isEmpty()) categories.firstOrNull() else null
+                }
                 updateUiState {
                     it.copy(
-                        filmLuts = newFilmList,
-                        favoriteLuts = newFavoriteList,
+                        filmLuts = films,
+                        favoriteLuts = favorites,
+                        categories = categories,
                         defaultPickerType = settingsRepository.getSettings().defaultPicker,
-                        userMessage = "Data refreshed successfully.",
+                        selectedCategory = shelf,
                     )
                 }
+                refreshThumbnailsForShelf()
             } catch (e: Exception) {
-                updateUiState { it.copy(userMessage = "Error refreshing data: ${e.message}") }
+                if (e is CancellationException) throw e
+                showMessage(getString(Res.string.msg_catalog_refresh_failed))
             } finally {
-                updateUiState { it.copy(isLoading = false) }
+                updateUiState { it.copy(isCatalogLoading = false) }
             }
         }
     }
 
-
-    fun dismissDownloadDialog() {
-        lutDownloadManager.dismissDownloadDialog()
-    }
+    fun dismissDownloadDialog() = lutDownloadManager.dismissDownloadDialog()
 
     fun confirmDownloadLuts() {
-        lutDownloadManager.confirmDownloadLuts(screenModelScope) { success, message ->
-            message?.let {
-                updateUiState { it.copy(userMessage = message) }
-            }
+        lutDownloadManager.confirmDownloadLuts(screenModelScope) { _, message ->
+            message?.let { showMessage(it) }
         }
     }
 
-    fun adjustContrast(value: Float) = updateImageAdjustment { it.copy(contrast = value) }
-    fun adjustShadows(value: Float) = updateImageAdjustment { it.copy(shadows = value) }
-    fun adjustHighlights(value: Float) = updateImageAdjustment { it.copy(highlights = value) }
-    fun adjustSaturation(value: Float) = updateImageAdjustment { it.copy(saturation = value) }
-    fun adjustTemperature(value: Float) = updateImageAdjustment { it.copy(temperature = value) }
-    fun adjustExposure(value: Float) = updateImageAdjustment { it.copy(exposure = value) }
-    fun addGrain(value: Float) = updateImageAdjustment { it.copy(grain = value) }
-    fun addChromaticAberration(value: Float) = updateImageAdjustment { it.copy(chromaticAberration = value) }
-    fun adjustLutIntensity(value: Float) = updateImageAdjustment { it.copy(lutIntensity = value) }
+    // ---------------------------------------------------------------- adjustments
 
-    private fun updateImageAdjustment(update: (ImageAdjustments) -> ImageAdjustments) {
-        currentAdjustments = update(currentAdjustments)
+    fun updateAdjustment(tool: AdjustmentTool, value: Float) {
+        currentAdjustments = tool.write(currentAdjustments, value)
         updateUiState { it.copy(imageAdjustments = currentAdjustments) }
         requestPreview()
     }
 
+    fun resetAdjustments() {
+        currentAdjustments = ImageAdjustments()
+        updateUiState { it.copy(imageAdjustments = currentAdjustments) }
+        requestPreview()
+    }
+
+    // ---------------------------------------------------------------------- films
+
+    /**
+     * Applies a film. No blocking dialog on purpose — this is now a single tap in
+     * the strip, and a full-screen spinner between every tap would make comparing
+     * two stocks unbearable. The inline flag is enough to explain a slow fetch.
+     */
     fun selectFilmLut(filmLut: FilmLut) {
         screenModelScope.launch {
             try {
-                updateUiState { it.copy(isLoading = true, loadingMessage = "Loading Film LUT...") }
+                updateUiState { it.copy(isApplyingFilm = true) }
                 val lutBytes = withContext(Dispatchers.IO) { repository.getLutBytes(filmLut) }
                 if (lutBytes == null) {
-                    updateUiState { it.copy(userMessage = "Error loading LUT.") }
+                    showMessage(getString(Res.string.msg_film_load_failed))
                     return@launch
                 }
                 currentLutBytes = lutBytes
                 updateUiState { it.copy(selectedFilm = filmLut) }
                 requestPreview()
             } catch (e: Exception) {
-                updateUiState { it.copy(userMessage = "Error applying LUT: ${e.message}") }
+                if (e is CancellationException) throw e
+                showMessage(getString(Res.string.msg_film_load_failed))
             } finally {
-                updateUiState { it.copy(isLoading = false, showBottomSheet = BottomSheetState.COLLAPSED) }
+                updateUiState { it.copy(isApplyingFilm = false) }
             }
         }
     }
 
+    /** Back to the untouched photo, keeping any manual adjustments. */
+    fun clearFilmLut() {
+        currentLutBytes = null
+        updateUiState { it.copy(selectedFilm = null) }
+        requestPreview()
+    }
 
-    fun generateThumbnailsForGroup(category: String) {
+    fun selectCategory(category: String?) {
+        if (_uiState.value.selectedCategory == category) return
+        updateUiState { it.copy(selectedCategory = category) }
+        refreshThumbnailsForShelf()
+    }
+
+    fun showBrowser() = updateUiState { it.copy(showBrowser = true) }
+
+    fun dismissBrowser() = updateUiState { it.copy(showBrowser = false) }
+
+    // ----------------------------------------------------------------- thumbnails
+
+    /**
+     * Renders the user's own photo through every LUT on the current shelf, so the
+     * strip previews the actual picture rather than a stock sample. Already-rendered
+     * entries are skipped, and the job is cancelled when the shelf changes — flicking
+     * across the category chips shouldn't queue up hundreds of renders.
+     */
+    private fun refreshThumbnailsForShelf() {
         currentThumbnailJob?.cancel()
-
         if (sourceBytes == null) return
+
+        val state = _uiState.value
+        val films = state.stripFilms
+        if (films.isEmpty()) return
+
         currentThumbnailJob = screenModelScope.launch {
             try {
                 createDirectory(THUMBNAILS_DIR)
-
-                val films = repository.getFilms(false).filter { it.category == category }
                 val thumbnails = _uiState.value.filmThumbnails.toMutableMap()
-
                 for (film in films) {
-                    if (thumbnails.containsKey(film.lut_name) || !isActive) continue
-
-                    val thumbnailPath = repository.generateLutThumbnail(film, IMAGE_FILE_NAME)
-                    thumbnails[film.lut_name] = thumbnailPath
+                    if (!isActive) return@launch
+                    if (thumbnails.containsKey(film.lut_name)) continue
+                    thumbnails[film.lut_name] = repository.generateLutThumbnail(film, IMAGE_FILE_NAME)
                     updateUiState { it.copy(filmThumbnails = thumbnails.toMap()) }
                 }
-
-                updateUiState { it.copy(filmThumbnails = thumbnails.toMap()) }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-            } finally {
-                updateUiState { it.copy(isLoading = false) }
+                // A thumbnail that fails to render simply falls back to the sample
+                // image in the strip — not worth interrupting the user for.
             }
         }
     }
 
-    private fun generateFilmThumbnails() {
+    /** Called by the browse sheet when the user opens a category it hasn't rendered yet. */
+    fun generateThumbnailsForCategory(category: String) {
         if (sourceBytes == null) return
         screenModelScope.launch {
             try {
                 createDirectory(THUMBNAILS_DIR)
-
-                val favoriteFilms = repository.getFavoriteFilms()
-                val favoriteLutNames = favoriteFilms.map { it.name }
-                val filmsToProcess = repository.getFilms(false)
-                    .filter { favoriteLutNames.contains(it.name) }
-
-                val thumbnails = mutableMapOf<String, String>()
-
-                for (film in filmsToProcess) {
-                    val thumbnailPath = repository.generateLutThumbnail(film, IMAGE_FILE_NAME)
-                    thumbnails[film.lut_name] = thumbnailPath
+                val films = repository.getFilms(false).filter { it.category == category }
+                val thumbnails = _uiState.value.filmThumbnails.toMutableMap()
+                for (film in films) {
+                    if (!isActive) return@launch
+                    if (thumbnails.containsKey(film.lut_name)) continue
+                    thumbnails[film.lut_name] = repository.generateLutThumbnail(film, IMAGE_FILE_NAME)
+                    updateUiState { it.copy(filmThumbnails = thumbnails.toMap()) }
                 }
-
-                updateUiState { it.copy(filmThumbnails = thumbnails.toMap()) }
             } catch (e: Exception) {
-                updateUiState { it.copy(userMessage = "Error generating thumbnails: ${e.message}") }
+                if (e is CancellationException) throw e
             }
         }
     }
+
+    // ---------------------------------------------------------------------- image
 
     fun onImagePickerResult(file: PlatformFile?) {
-        file?.let { platformFile ->
-            if (!supportedImageExtensions.contains(platformFile.extension.lowercase())) {
-                updateUiState { it.copy(userMessage = "Unsupported image type.") }
-                return
+        val platformFile = file ?: return
+        val extension = platformFile.extension.lowercase()
+        if (!supportedImageExtensions.contains(extension)) {
+            screenModelScope.launch { showMessage(getString(Res.string.msg_unsupported_image)) }
+            return
+        }
+
+        screenModelScope.launch {
+            val originalBytes = platformFile.readBytes()
+            // Stash the raw original (with original extension) so export can read its
+            // EXIF / detect format when "original format" export is selected.
+            val originalName = "$ORIGINAL_IMAGE_FILE_PREFIX.$extension"
+            saveImageFile(originalName, originalBytes)
+            originalImageFileName = originalName
+
+            saveImageFile(IMAGE_FILE_NAME, originalBytes)
+            if (formatsNeedingConversion.contains(extension)) {
+                convertImageToJpeg(IMAGE_FILE_NAME)
             }
-            screenModelScope.launch {
-                val originalBytes = platformFile.readBytes()
-                // Stash the raw original (with original extension) so export can read its
-                // EXIF / detect format when "original format" export is selected.
-                val originalName = "$ORIGINAL_IMAGE_FILE_PREFIX.${platformFile.extension.lowercase()}"
-                saveImageFile(originalName, originalBytes)
-                originalImageFileName = originalName
+            fixImageOrientation(image = IMAGE_FILE_NAME)
 
-                saveImageFile(IMAGE_FILE_NAME, originalBytes)
-                if (formatsNeedingConversion.contains(platformFile.extension.lowercase())) {
-                    convertImageToJpeg(IMAGE_FILE_NAME)
-                }
-                fixImageOrientation(image = IMAGE_FILE_NAME)
+            val bytes = withContext(Dispatchers.IO) { readImageFile(IMAGE_FILE_NAME) }
+            sourceBytes = bytes
+            processor.clearCache()
 
-                val bytes = withContext(Dispatchers.IO) { readImageFile(IMAGE_FILE_NAME) }
-                sourceBytes = bytes
-                processor.clearCache()
-
-                // Reset everything that was tied to the previous image.
-                currentAdjustments = ImageAdjustments()
-                updateUiState {
-                    it.copy(
-                        imageAdjustments = ImageAdjustments(),
-                        filmThumbnails = emptyMap(),
-                    )
-                }
-
-                generateFilmThumbnails()
-                requestPreview()
+            // Everything tied to the previous image is now wrong, including every
+            // rendered thumbnail — they are keyed by LUT, not by photo.
+            currentAdjustments = ImageAdjustments()
+            currentLutBytes = null
+            updateUiState {
+                it.copy(
+                    hasImage = true,
+                    imageAdjustments = ImageAdjustments(),
+                    filmThumbnails = emptyMap(),
+                    selectedFilm = null,
+                )
             }
+
+            refreshThumbnailsForShelf()
+            requestPreview()
         }
     }
 
-    fun showFilmLutsBottomSheet() {
-        updateUiState { it.copy(showBottomSheet = BottomSheetState.EXPANDED) }
-    }
+    fun snackbarMessageShown() = updateUiState { it.copy(userMessage = null) }
 
-    fun dismissFilmLutBottomSheet() {
-        updateUiState { it.copy(showBottomSheet = BottomSheetState.HIDDEN) }
-    }
-
-    fun snackbarMessageShown() {
-        updateUiState { it.copy(userMessage = null) }
-    }
-
-    fun showOriginalImage(show: Boolean) {
-        updateUiState { it.copy(showAdjustments = !show) }
+    /** Held down by the compare button: shows the untouched photo for as long as it's true. */
+    fun setShowOriginal(showOriginal: Boolean) {
+        updateUiState { it.copy(showAdjustments = !showOriginal) }
         requestPreview()
     }
 
+    /** Drops the film and every adjustment, back to the photo as imported. */
     fun resetImage() {
         currentAdjustments = ImageAdjustments()
         currentLutBytes = null
         updateUiState {
-            it.copy(
-                selectedFilm = null,
-                imageAdjustments = ImageAdjustments(),
-            )
+            it.copy(selectedFilm = null, imageAdjustments = ImageAdjustments())
         }
         requestPreview()
     }
 
     fun exportImage() {
         val bytes = sourceBytes ?: run {
-            updateUiState { it.copy(userMessage = "Please choose an image first.") }
+            screenModelScope.launch { showMessage(getString(Res.string.msg_choose_image_first)) }
             return
         }
         screenModelScope.launch {
             try {
+                // Resolved up front: `updateUiState` takes a plain lambda, and
+                // `getString` is suspending.
+                val exportingMessage = getString(Res.string.loading_exporting)
+                val savingMessage = getString(Res.string.loading_saving)
+
                 updateUiState {
                     it.copy(
                         isLoading = true,
-                        loadingMessage = "Processing image with effects...",
+                        loadingMessage = exportingMessage,
                         loadingProgress = 0f,
                     )
                 }
@@ -398,20 +451,17 @@ data class HomeScreenModel(
                     quality = settingsRepository.getSettings().exportQuality,
                     grainSeed = (kotlin.random.Random.nextFloat() * 1000f),
                     highQualityGrain = true,
-                    onProgress = { p ->
-                        updateUiState { it.copy(loadingProgress = p) }
-                    },
+                    onProgress = { p -> updateUiState { it.copy(loadingProgress = p) } },
                 ) ?: throw IllegalStateException("Failed to process image")
 
                 withContext(Dispatchers.IO) {
                     saveImageFile(EDITED_IMAGE_FILE_NAME, exportedBytes)
                 }
 
-                // Switch back to indeterminate spinner for the gallery save —
-                // PhotoKit/MediaStore don't expose progress, so a fake bar
-                // there would be misleading.
+                // Switch back to indeterminate for the gallery save — PhotoKit and
+                // MediaStore don't expose progress, so a bar there would be a lie.
                 updateUiState {
-                    it.copy(loadingMessage = "Saving to gallery...", loadingProgress = null)
+                    it.copy(loadingMessage = savingMessage, loadingProgress = null)
                 }
                 saveImageToGallery(
                     image = EDITED_IMAGE_FILE_NAME,
@@ -420,22 +470,31 @@ data class HomeScreenModel(
                     originalImage = originalImageFileName,
                 )
 
-                updateUiState { it.copy(userMessage = "Image exported successfully with all effects applied.") }
+                showMessage(getString(Res.string.msg_export_success))
             } catch (e: Exception) {
-                updateUiState { it.copy(userMessage = "Error exporting image: ${e.message}") }
+                if (e is CancellationException) throw e
+                showMessage(getString(Res.string.msg_export_failed))
             } finally {
                 updateUiState { it.copy(isLoading = false, loadingProgress = null) }
             }
         }
     }
 
+    // ------------------------------------------------------------------ favourites
+
+    fun toggleFavorite(filmLut: FilmLut) {
+        val isFavorite = _uiState.value.favoriteLuts.any { it.name == filmLut.name }
+        if (isFavorite) removeFavoriteFilm(filmLut) else addFavoriteFilm(filmLut)
+    }
+
     fun addFavoriteFilm(filmLut: FilmLut) {
         screenModelScope.launch {
             try {
-                val newFavoriteLutList = repository.addFavoriteFilm(filmLut.toFavoriteLut())
-                updateUiState { it.copy(favoriteLuts = newFavoriteLutList, userMessage = "Added to favorites.") }
+                val favorites = repository.addFavoriteFilm(filmLut.toFavoriteLut())
+                updateUiState { it.copy(favoriteLuts = favorites) }
+                showMessage(getString(Res.string.msg_favorite_added))
             } catch (e: Exception) {
-                updateUiState { it.copy(userMessage = "Error adding to favorites: ${e.message}") }
+                if (e is CancellationException) throw e
             }
         }
     }
@@ -443,13 +502,18 @@ data class HomeScreenModel(
     fun removeFavoriteFilm(filmLut: FilmLut) {
         screenModelScope.launch {
             try {
-                val newFavoriteLutList = repository.removeFavoriteFilm(filmLut.name)
-                updateUiState { it.copy(favoriteLuts = newFavoriteLutList, userMessage = "Removed from favorites.") }
+                val favorites = repository.removeFavoriteFilm(filmLut.name)
+                updateUiState { it.copy(favoriteLuts = favorites) }
+                showMessage(getString(Res.string.msg_favorite_removed))
             } catch (e: Exception) {
-                updateUiState { it.copy(userMessage = "Error removing from favorites: ${e.message}") }
+                if (e is CancellationException) throw e
             }
         }
     }
+
+    // --------------------------------------------------------------------- private
+
+    private fun showMessage(message: String) = updateUiState { it.copy(userMessage = message) }
 
     private fun addSettingsListeners() {
         settingsRepository.getSettings().defaultPickerListener { defaultPicker ->
@@ -476,23 +540,17 @@ data class HomeScreenModel(
                 .collectLatest { request ->
                     val source = sourceBytes ?: return@collectLatest
                     val bytes = withContext(Dispatchers.Default) {
-                        if (request.showOriginal) {
-                            processor.process(
-                                imageBytes = source,
-                                lutBytes = null,
-                                adjustments = ImageAdjustments(),
-                                maxDimension = SkiaImageProcessor.PREVIEW_MAX_DIMENSION,
-                                quality = PREVIEW_QUALITY,
-                            )
-                        } else {
-                            processor.process(
-                                imageBytes = source,
-                                lutBytes = currentLutBytes,
-                                adjustments = currentAdjustments,
-                                maxDimension = SkiaImageProcessor.PREVIEW_MAX_DIMENSION,
-                                quality = PREVIEW_QUALITY,
-                            )
-                        }
+                        processor.process(
+                            imageBytes = source,
+                            lutBytes = if (request.showOriginal) null else currentLutBytes,
+                            adjustments = if (request.showOriginal) {
+                                ImageAdjustments()
+                            } else {
+                                currentAdjustments
+                            },
+                            maxDimension = SkiaImageProcessor.PREVIEW_MAX_DIMENSION,
+                            quality = PREVIEW_QUALITY,
+                        )
                     } ?: return@collectLatest
                     val token = ++previewVersion
                     updateUiState { it.copy(previewImage = bytes, previewToken = token) }

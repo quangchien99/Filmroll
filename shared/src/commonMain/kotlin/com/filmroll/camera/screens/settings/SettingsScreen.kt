@@ -1,37 +1,41 @@
 package com.filmroll.camera.screens.settings
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.rounded.CloudDownload
+import androidx.compose.material.icons.rounded.Code
+import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material.icons.rounded.HighQuality
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.MailOutline
+import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,8 +65,6 @@ import com.filmroll.camera.resources.clear
 import com.filmroll.camera.resources.contact
 import com.filmroll.camera.resources.daily_reminder
 import com.filmroll.camera.resources.daily_reminder_summary
-import com.filmroll.camera.resources.dark_mode
-import com.filmroll.camera.resources.dark_mode_summary
 import com.filmroll.camera.resources.debug
 import com.filmroll.camera.resources.debug_clear_data
 import com.filmroll.camera.resources.debug_clear_data_confirm
@@ -83,27 +85,47 @@ import com.filmroll.camera.resources.images
 import com.filmroll.camera.resources.language
 import com.filmroll.camera.resources.notifications
 import com.filmroll.camera.resources.settings
+import com.filmroll.camera.resources.settings_editing
+import com.filmroll.camera.resources.settings_export_quality_summary
 import com.filmroll.camera.resources.source_code
+import com.filmroll.camera.resources.theme_mode
+import com.filmroll.camera.resources.theme_mode_dark
+import com.filmroll.camera.resources.theme_mode_light
 import com.filmroll.camera.resources.theme_mode_system
 import com.filmroll.camera.screens.language.LanguageScreen
 import com.filmroll.camera.util.AppContext
 import com.filmroll.camera.util.Platform
 import com.filmroll.camera.util.restartApp
+import com.filmroll.camera.view.AppDialog
+import com.filmroll.camera.view.ChoiceRow
+import com.filmroll.camera.view.ChromeIconButton
 import com.filmroll.camera.view.LutDownloadDialog
 import com.filmroll.camera.view.LutDownloadProgressDialog
-import com.filmroll.camera.view.SettingsSlider
+import com.filmroll.camera.view.SegmentedTabs
+import com.filmroll.camera.view.SettingsGroup
+import com.filmroll.camera.view.SettingsRow
+import com.filmroll.camera.view.SettingsRowDivider
+import com.filmroll.camera.view.SettingsSliderRow
+import com.filmroll.camera.view.SettingsSwitchRow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.mp.KoinPlatform.getKoin
 import sh.calvin.autolinktext.rememberAutoLinkText
 
-
+/**
+ * Settings, grouped.
+ *
+ * The one behavioural change worth calling out is the theme control. It used to
+ * be two switches — "follow system" and "dark mode" — where the second was
+ * disabled by the first, which meant the app had three states expressed as four
+ * combinations and one of them was unreachable. A three-way segment says the same
+ * thing in one row and cannot be put into a nonsense state.
+ */
 class SettingsScreen : Screen {
 
     // See HomeScreen — workaround for voyager#546.
     override val key: ScreenKey = uniqueScreenKey
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
@@ -132,112 +154,181 @@ class SettingsScreen : Screen {
             restartApp()
         }
 
-        Scaffold(
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-            topBar = {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        titleContentColor = MaterialTheme.colorScheme.primary,
-                    ),
-                    title = {
-                        Text(
-                            stringResource(Res.string.settings),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { navigator.pop() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                        }
-                    }
-                )
-            },
-        ) { paddingValues ->
+        uiState.userMessage?.let { message ->
+            LaunchedEffect(message) {
+                snackbarHostState.showSnackbar(message)
+                vm.snackbarMessageShown()
+            }
+        }
 
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface),
+        ) {
             Column(
                 modifier = Modifier
-                    .padding(paddingValues)
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .navigationBarsPadding()
-                    .padding(horizontal = 16.dp),
+                    .verticalScroll(rememberScrollState()),
             ) {
-                SectionHeader(stringResource(Res.string.appearance))
-                SwitchRow(
-                    title = stringResource(Res.string.theme_mode_system),
-                    checked = uiState.themeMode == ThemeMode.SYSTEM,
-                    onCheckedChange = { followSystem ->
-                        vm.updateThemeMode(if (followSystem) ThemeMode.SYSTEM else ThemeMode.LIGHT)
-                    },
-                )
-                SwitchRow(
-                    title = stringResource(Res.string.dark_mode),
-                    summary = stringResource(Res.string.dark_mode_summary),
-                    checked = uiState.themeMode == ThemeMode.DARK,
-                    enabled = uiState.themeMode != ThemeMode.SYSTEM,
-                    onCheckedChange = { dark ->
-                        vm.updateThemeMode(if (dark) ThemeMode.DARK else ThemeMode.LIGHT)
-                    },
-                )
-                ListItem(
-                    modifier = Modifier.clickable { navigator.push(LanguageScreen()) },
-                    text = { RowTitle(stringResource(Res.string.language)) },
-                    secondaryText = { RowSummary(uiState.language.endonym) },
-                )
-
-                SettingsDivider()
-                SectionHeader(stringResource(Res.string.notifications))
-                SwitchRow(
-                    title = stringResource(Res.string.daily_reminder),
-                    summary = stringResource(Res.string.daily_reminder_summary),
-                    checked = uiState.dailyReminderEnabled,
-                    onCheckedChange = vm::setDailyReminderEnabled,
-                )
-
-                SettingsDivider()
-                SectionHeader(stringResource(Res.string.settings))
-                Spacer(modifier = Modifier.height(8.dp))
-                SettingsSlider(
-                    name = stringResource(Res.string.image_export_quality),
-                    value = uiState.exportQuality.toFloat(),
-                    steps = 8,
-                    range = 10f..100f,
-                    onValueChange = vm::updateExportQualitySettings
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                ListItem(
-                    modifier = Modifier.clickable { showExportFormatDialog = true },
-                    text = { RowTitle(stringResource(Res.string.export_format)) },
-                    secondaryText = { RowSummary(stringResource(uiState.exportFormat.getString())) },
-                )
-                ListItem(
-                    modifier = Modifier.clickable { showDefaultPickerDialog = true },
-                    text = { RowTitle(stringResource(Res.string.default_picker)) },
-                    secondaryText = { RowSummary(stringResource(uiState.defaultPicker.getString())) },
-                )
-                ListItem(
-                    modifier = Modifier.clickable { lutDownloadManager.showDownloadDialog() },
-                    text = { RowTitle(stringResource(Res.string.download_luts)) },
-                    secondaryText = { RowSummary(stringResource(Res.string.download_luts_summary)) },
-                )
-
-                SettingsDivider()
-                SectionHeader(stringResource(Res.string.about))
-                AboutSection()
-
-                if (uiState.showDebugTools) {
-                    SettingsDivider()
-                    SectionHeader(stringResource(Res.string.debug))
-                    ListItem(
-                        modifier = Modifier.clickable { showClearDataDialog = true },
-                        text = { RowTitle(stringResource(Res.string.debug_clear_data)) },
-                        secondaryText = { RowSummary(stringResource(Res.string.debug_clear_data_summary)) },
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    ChromeIconButton(
+                        onClick = { navigator.pop() },
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        backgroundAlpha = 0.06f,
                     )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = stringResource(Res.string.settings),
+                    style = MaterialTheme.typography.displaySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(start = 20.dp, top = 4.dp, bottom = 24.dp),
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(28.dp),
+                ) {
+                    SettingsGroup(title = stringResource(Res.string.appearance)) {
+                        ThemeRow(
+                            themeMode = uiState.themeMode,
+                            onThemeModeChange = vm::updateThemeMode,
+                        )
+                        SettingsRowDivider(insetIcon = false)
+                        SettingsRow(
+                            title = stringResource(Res.string.language),
+                            icon = Icons.Rounded.Language,
+                            value = uiState.language.endonym,
+                            onClick = { navigator.push(LanguageScreen()) },
+                        )
+                    }
+
+                    SettingsGroup(title = stringResource(Res.string.notifications)) {
+                        SettingsSwitchRow(
+                            title = stringResource(Res.string.daily_reminder),
+                            summary = stringResource(Res.string.daily_reminder_summary),
+                            icon = Icons.Rounded.NotificationsActive,
+                            checked = uiState.dailyReminderEnabled,
+                            onCheckedChange = vm::setDailyReminderEnabled,
+                        )
+                    }
+
+                    SettingsGroup(title = stringResource(Res.string.settings_editing)) {
+                        SettingsSliderRow(
+                            title = stringResource(Res.string.image_export_quality),
+                            summary = stringResource(Res.string.settings_export_quality_summary),
+                            icon = Icons.Rounded.HighQuality,
+                            value = uiState.exportQuality.toFloat(),
+                            valueRange = 10f..100f,
+                            steps = 8,
+                            onValueChange = vm::updateExportQualitySettings,
+                        )
+                        SettingsRowDivider()
+                        SettingsRow(
+                            title = stringResource(Res.string.export_format),
+                            icon = Icons.Rounded.Image,
+                            value = stringResource(uiState.exportFormat.getString()),
+                            onClick = { showExportFormatDialog = true },
+                        )
+                        SettingsRowDivider()
+                        SettingsRow(
+                            title = stringResource(Res.string.default_picker),
+                            icon = Icons.Rounded.PhotoLibrary,
+                            value = stringResource(uiState.defaultPicker.getString()),
+                            onClick = { showDefaultPickerDialog = true },
+                        )
+                        SettingsRowDivider()
+                        SettingsRow(
+                            title = stringResource(Res.string.download_luts),
+                            summary = stringResource(Res.string.download_luts_summary),
+                            icon = Icons.Rounded.CloudDownload,
+                            onClick = { lutDownloadManager.showDownloadDialog() },
+                        )
+                    }
+
+                    SettingsGroup(title = stringResource(Res.string.about)) {
+                        SettingsRow(
+                            title = stringResource(Res.string.app_version),
+                            icon = Icons.Rounded.Info,
+                            value = Platform(AppContext).getAppVersion(),
+                        )
+                        SettingsRowDivider()
+                        SettingsRow(
+                            title = stringResource(Res.string.developer),
+                            icon = Icons.Rounded.Person,
+                            summary = "Quang Chien Pham",
+                        )
+                        SettingsRowDivider()
+                        SettingsRow(
+                            title = stringResource(Res.string.source_code),
+                            icon = Icons.Rounded.Code,
+                            trailing = {
+                                Text(
+                                    text = AnnotatedString.rememberAutoLinkText(
+                                        "https://github.com/quangchien99/Filmroll",
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            },
+                        )
+                        SettingsRowDivider()
+                        SettingsRow(
+                            title = stringResource(Res.string.contact),
+                            icon = Icons.Rounded.MailOutline,
+                            trailing = {
+                                Text(
+                                    text = AnnotatedString.rememberAutoLinkText(
+                                        "phamquangchien170499@gmail.com",
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            },
+                        )
+                    }
+
+                    if (uiState.showDebugTools) {
+                        SettingsGroup(title = stringResource(Res.string.debug)) {
+                            SettingsRow(
+                                title = stringResource(Res.string.debug_clear_data),
+                                summary = stringResource(Res.string.debug_clear_data_summary),
+                                icon = Icons.Rounded.DeleteForever,
+                                iconTint = MaterialTheme.colorScheme.error,
+                                onClick = { showClearDataDialog = true },
+                            )
+                        }
+                    }
+                }
+
+                Spacer(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .height(40.dp),
+                )
+            }
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+            ) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = MaterialTheme.colorScheme.inverseSurface,
+                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                )
             }
         }
 
@@ -250,239 +341,144 @@ class SettingsScreen : Screen {
                         coroutineScope.launch { snackbarHostState.showSnackbar(it) }
                     }
                 }
-            }
+            },
         )
 
         LutDownloadProgressDialog(
             isVisible = lutDownloadState.showDownloadProgress,
             current = lutDownloadState.downloadProgress.first,
             total = lutDownloadState.downloadProgress.second,
-            onDismiss = {} // Progress dialog can't be dismissed
+            onDismiss = {}, // Progress dialog can't be dismissed
         )
 
-        uiState.userMessage?.let { message ->
-            LaunchedEffect(vm, message) {
-                snackbarHostState.showSnackbar(message)
-                vm.snackbarMessageShown()
+        if (showExportFormatDialog) {
+            AppDialog(
+                onDismissRequest = { showExportFormatDialog = false },
+                icon = Icons.Rounded.Image,
+                title = stringResource(Res.string.export_format),
+                dismissLabel = stringResource(Res.string.cancel),
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+                ChoiceRow(
+                    title = stringResource(Res.string.export_format_jpeg),
+                    summary = stringResource(Res.string.export_format_summary_jpeg),
+                    selected = uiState.exportFormat == ExportFormat.JPEG,
+                    onClick = {
+                        vm.updateExportFormatSettings(ExportFormat.JPEG)
+                        showExportFormatDialog = false
+                    },
+                )
+                ChoiceRow(
+                    title = stringResource(Res.string.export_format_original),
+                    summary = stringResource(Res.string.export_format_summary_original),
+                    selected = uiState.exportFormat == ExportFormat.ORIGINAL,
+                    onClick = {
+                        vm.updateExportFormatSettings(ExportFormat.ORIGINAL)
+                        showExportFormatDialog = false
+                    },
+                )
             }
         }
 
-        DefaultPickerDialog(showDefaultPickerDialog, onItemClick = vm::updateDefaultPickerSettings) {
-            showDefaultPickerDialog = false
-        }
-
-        ExportFormatDialog(showExportFormatDialog, onItemClick = vm::updateExportFormatSettings) {
-            showExportFormatDialog = false
+        if (showDefaultPickerDialog) {
+            AppDialog(
+                onDismissRequest = { showDefaultPickerDialog = false },
+                icon = Icons.Rounded.PhotoLibrary,
+                title = stringResource(Res.string.default_picker),
+                dismissLabel = stringResource(Res.string.cancel),
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+                ChoiceRow(
+                    title = stringResource(Res.string.images),
+                    selected = uiState.defaultPicker == DefaultPickerType.IMAGES,
+                    onClick = {
+                        vm.updateDefaultPickerSettings(DefaultPickerType.IMAGES)
+                        showDefaultPickerDialog = false
+                    },
+                )
+                ChoiceRow(
+                    title = stringResource(Res.string.files),
+                    selected = uiState.defaultPicker == DefaultPickerType.FILES,
+                    onClick = {
+                        vm.updateDefaultPickerSettings(DefaultPickerType.FILES)
+                        showDefaultPickerDialog = false
+                    },
+                )
+            }
         }
 
         if (showClearDataDialog) {
-            AlertDialog(
+            AppDialog(
                 onDismissRequest = { showClearDataDialog = false },
-                title = { Text(stringResource(Res.string.debug_clear_data)) },
-                text = { Text(stringResource(Res.string.debug_clear_data_confirm)) },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showClearDataDialog = false
-                        vm.clearAllData()
-                    }) { Text(stringResource(Res.string.clear)) }
+                icon = Icons.Rounded.DeleteForever,
+                iconTint = MaterialTheme.colorScheme.error,
+                title = stringResource(Res.string.debug_clear_data),
+                message = stringResource(Res.string.debug_clear_data_confirm),
+                confirmLabel = stringResource(Res.string.clear),
+                destructive = true,
+                onConfirm = {
+                    showClearDataDialog = false
+                    vm.clearAllData()
                 },
-                dismissButton = {
-                    TextButton(onClick = { showClearDataDialog = false }) {
-                        Text(stringResource(Res.string.cancel))
-                    }
-                },
+                dismissLabel = stringResource(Res.string.cancel),
             )
         }
     }
+}
 
-    @Composable
-    private fun SectionHeader(text: String) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp),
-        )
-    }
+/**
+ * Theme choice as one three-way control. The order matches the mental model —
+ * automatic first, then the two manual overrides.
+ */
+@Composable
+private fun ThemeRow(
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit,
+) {
+    val order = listOf(ThemeMode.SYSTEM, ThemeMode.LIGHT, ThemeMode.DARK)
+    val labels = listOf(
+        stringResource(Res.string.theme_mode_system),
+        stringResource(Res.string.theme_mode_light),
+        stringResource(Res.string.theme_mode_dark),
+    )
 
-    @Composable
-    private fun SettingsDivider() {
-        Divider(
-            color = MaterialTheme.colorScheme.outlineVariant,
-            thickness = 1.dp,
-            modifier = Modifier.padding(top = 12.dp),
-        )
-    }
-
-    @Composable
-    private fun RowTitle(text: String) {
-        Text(text = text, style = MaterialTheme.typography.labelLarge)
-    }
-
-    @Composable
-    private fun RowSummary(text: String) {
-        Text(text = text, style = MaterialTheme.typography.labelMedium)
-    }
-
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    private fun SwitchRow(
-        title: String,
-        checked: Boolean,
-        onCheckedChange: (Boolean) -> Unit,
-        summary: String? = null,
-        enabled: Boolean = true,
-    ) {
-        ListItem(
-            modifier = Modifier.clickable(enabled = enabled) { onCheckedChange(!checked) },
-            text = { RowTitle(title) },
-            secondaryText = summary?.let { { RowSummary(it) } },
-            trailing = {
-                Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
-            },
-        )
-    }
-
-    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
-    @Composable
-    fun ExportFormatDialog(
-        show: Boolean,
-        onItemClick: (ExportFormat) -> Unit,
-        onDismiss: () -> Unit
-    ) {
-        if (!show) return
-        BasicAlertDialog(onDismissRequest = onDismiss) {
-            Surface(
-                modifier = Modifier.wrapContentWidth().wrapContentHeight(),
-                shape = MaterialTheme.shapes.large,
-                tonalElevation = AlertDialogDefaults.TonalElevation
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                        MaterialTheme.shapes.small,
+                    ),
+                contentAlignment = Alignment.Center,
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = stringResource(Res.string.export_format),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    ListItem(
-                        text = { RowSummary(stringResource(Res.string.export_format_jpeg)) },
-                        secondaryText = {
-                            Text(
-                                text = stringResource(Res.string.export_format_summary_jpeg),
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        },
-                        modifier = Modifier.clickable {
-                            onItemClick(ExportFormat.JPEG)
-                            onDismiss()
-                        }
-                    )
-                    ListItem(
-                        text = { RowSummary(stringResource(Res.string.export_format_original)) },
-                        secondaryText = {
-                            Text(
-                                text = stringResource(Res.string.export_format_summary_original),
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        },
-                        modifier = Modifier.clickable {
-                            onItemClick(ExportFormat.ORIGINAL)
-                            onDismiss()
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    TextButton(
-                        modifier = Modifier.align(Alignment.End),
-                        onClick = onDismiss
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.cancel),
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                    }
-                }
+                Icon(
+                    imageVector = Icons.Rounded.Palette,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(19.dp),
+                )
             }
+            Spacer(modifier = Modifier.width(14.dp))
+            Text(
+                text = stringResource(Res.string.theme_mode),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
         }
-    }
 
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    fun AboutSection() {
-        Column {
-            ListItem(
-                text = { RowTitle(stringResource(Res.string.app_version)) },
-                secondaryText = { RowSummary(Platform(AppContext).getAppVersion()) },
-            )
-            ListItem(
-                text = { RowTitle(stringResource(Res.string.developer)) },
-                secondaryText = { RowSummary("Quang Chien Pham") },
-            )
-            ListItem(
-                text = { RowTitle(stringResource(Res.string.source_code)) },
-                secondaryText = {
-                    Text(
-                        AnnotatedString.rememberAutoLinkText("https://github.com/quangchien99/Filmroll"),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                },
-            )
-            ListItem(
-                text = { RowTitle(stringResource(Res.string.contact)) },
-                secondaryText = {
-                    Text(
-                        AnnotatedString.rememberAutoLinkText("phamquangchien170499@gmail.com"),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                },
-            )
-        }
-    }
+        Spacer(modifier = Modifier.height(12.dp))
 
-    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
-    @Composable
-    fun DefaultPickerDialog(
-        show: Boolean,
-        onItemClick: (DefaultPickerType) -> Unit,
-        onDismiss: () -> Unit
-    ) {
-        if (!show) return
-        BasicAlertDialog(onDismissRequest = onDismiss) {
-            Surface(
-                modifier = Modifier.wrapContentWidth().wrapContentHeight(),
-                shape = MaterialTheme.shapes.large,
-                tonalElevation = AlertDialogDefaults.TonalElevation
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = stringResource(Res.string.default_picker),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    ListItem(
-                        text = { RowSummary(stringResource(Res.string.images)) },
-                        modifier = Modifier.clickable {
-                            onItemClick(DefaultPickerType.IMAGES)
-                            onDismiss()
-                        }
-                    )
-                    ListItem(
-                        text = { RowSummary(stringResource(Res.string.files)) },
-                        modifier = Modifier.clickable {
-                            onItemClick(DefaultPickerType.FILES)
-                            onDismiss()
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    TextButton(
-                        modifier = Modifier.align(Alignment.End),
-                        onClick = onDismiss
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.cancel),
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                    }
-                }
-            }
-        }
+        SegmentedTabs(
+            options = labels,
+            selectedIndex = order.indexOf(themeMode).coerceAtLeast(0),
+            onSelect = { onThemeModeChange(order[it]) },
+            modifier = Modifier.fillMaxWidth(),
+            trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            thumbColor = MaterialTheme.colorScheme.primary,
+            selectedTextColor = MaterialTheme.colorScheme.onPrimary,
+            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }

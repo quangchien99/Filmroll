@@ -78,4 +78,61 @@
     <string name="debug_clear_data_confirm">Clear all app data? The app will restart at the splash screen.</string>
     <string name="debug_clear_data_done">All app data cleared.</string>
     <string name="clear">Clear</string>
+
+    <!-- Editor -->
+    <string name="editor_tab_film">Film</string>
+    <string name="editor_tab_adjust">Adjust</string>
+    <string name="badge_original">Original</string>
+    <string name="film_none">None</string>
+    <string name="strip_browse">All</string>
+    <string name="home_empty_title">Load a frame</string>
+    <string name="home_empty_body">Pick a photo and try it on real film stocks — grain, colour and all.</string>
+    <string name="no_favorites_body">Press and hold a film to keep it on this shelf.</string>
+
+    <!-- Film library -->
+    <string name="browse_films">Film library</string>
+    <string name="search_films_hint">Search film stocks</string>
+    <string name="no_films_found">No film matches that search.</string>
+    <string name="category_all">All</string>
+    <string name="category_favorites">Favorites</string>
+
+    <!-- Adjustment tools -->
+    <string name="tool_strength">Strength</string>
+    <string name="tool_exposure">Exposure</string>
+    <string name="tool_contrast">Contrast</string>
+    <string name="tool_temperature">Warmth</string>
+    <string name="tool_saturation">Saturation</string>
+    <string name="tool_shadows">Shadows</string>
+    <string name="tool_highlights">Highlights</string>
+    <string name="tool_grain">Grain</string>
+    <string name="tool_fringing">Fringing</string>
+
+    <!-- Actions -->
+    <string name="action_compare">Hold to see the original</string>
+    <string name="action_reset">Reset edits</string>
+    <string name="action_export">Save</string>
+    <string name="action_choose_photo">Choose a photo</string>
+    <string name="action_change_photo">Change photo</string>
+    <string name="action_download">Download</string>
+    <string name="action_later">Not now</string>
+    <string name="close">Close</string>
+
+    <!-- Progress and messages -->
+    <string name="loading_exporting">Developing your photo…</string>
+    <string name="loading_saving">Saving to your gallery…</string>
+    <string name="msg_export_success">Saved to your gallery.</string>
+    <string name="msg_export_failed">Couldn\'t save that one. Please try again.</string>
+    <string name="msg_choose_image_first">Choose a photo first.</string>
+    <string name="msg_unsupported_image">That file type isn\'t supported.</string>
+    <string name="msg_film_load_failed">Couldn\'t load that film.</string>
+    <string name="msg_catalog_refresh_failed">Couldn\'t refresh the film list.</string>
+    <string name="msg_favorite_added">Added to favorites.</string>
+    <string name="msg_favorite_removed">Removed from favorites.</string>
+    <string name="download_luts_message">Save every film stock to this device so you can keep editing without a connection.</string>
+    <string name="downloading_luts">Downloading film stocks</string>
+    <string name="downloading_luts_count">%1$d of %2$d</string>
+
+    <!-- Settings -->
+    <string name="settings_editing">Editing</string>
+    <string name="settings_export_quality_summary">Higher quality means larger files</string>
 </resources>
