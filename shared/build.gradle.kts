@@ -39,8 +39,8 @@ kotlin {
     iosSimulatorArm64()
 
     cocoapods {
-        summary = "Some description for the Shared Module"
-        homepage = "Link to the Shared Module homepage"
+        summary = "Shared Kotlin Multiplatform module for Filmroll: Vintage Camera"
+        homepage = "https://github.com/quangchien99/Filmroll"
         version = "1.0"
         ios.deploymentTarget = "16.0"
         podfile = project.file("../iosApp/Podfile")

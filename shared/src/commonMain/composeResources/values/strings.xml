@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Film Simulator</string>
+    <string name="app_name">Filmroll</string>
+    <string name="app_full_name">Filmroll: Vintage Camera</string>
     <string name="select_image">Select Image</string>
     <string name="film">Film</string>
     <string name="select_your_film">Select Your Film</string>

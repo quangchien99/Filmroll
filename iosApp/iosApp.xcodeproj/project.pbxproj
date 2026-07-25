@@ -356,7 +356,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = iosApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Film Simulator";
+				INFOPLIST_KEY_CFBundleDisplayName = Filmroll;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow the app to export the image to your Gallery";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -399,7 +399,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = iosApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Film Simulator";
+				INFOPLIST_KEY_CFBundleDisplayName = Filmroll;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow the app to export the image to your Gallery";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
