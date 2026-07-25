@@ -63,8 +63,10 @@ android {
         applicationId = "com.filmroll.camera"
         minSdk = 24
         targetSdk = 37
-        versionCode = 15
-        versionName = "0.6.3"
+        // Filmroll ships under a new applicationId, so the version series restarts here
+        // rather than continuing the upstream fork's.
+        versionCode = 1
+        versionName = "1.0.0"
     }
     buildFeatures {
         compose = true
@@ -77,7 +79,12 @@ android {
     }
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
     compileOptions {
