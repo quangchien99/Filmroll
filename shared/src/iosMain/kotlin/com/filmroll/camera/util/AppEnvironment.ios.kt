@@ -8,6 +8,7 @@ import platform.Foundation.languageCode
 
 private const val APPLE_LANGUAGES_KEY = "AppleLanguages"
 
+@OptIn(kotlin.experimental.ExperimentalNativeApi::class)
 actual val isDebugBuild: Boolean
     get() = kotlin.native.Platform.isDebugBinary
 

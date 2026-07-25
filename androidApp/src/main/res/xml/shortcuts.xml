@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_uninstall"
+        android:shortcutDisabledMessage="@string/shortcut_uninstall_disabled"
+        android:shortcutId="uninstall"
+        android:shortcutLongLabel="@string/shortcut_uninstall_long_label"
+        android:shortcutShortLabel="@string/shortcut_uninstall_short_label">
+        <intent
+            android:action="com.filmroll.camera.action.UNINSTALL"
+            android:targetClass="com.filmroll.camera.android.MainActivity"
+            android:targetPackage="com.filmroll.camera" />
+    </shortcut>
+</shortcuts>

@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Filmroll</string>
+    <string name="shortcut_uninstall_short_label">Uninstall</string>
+    <string name="shortcut_uninstall_long_label">Uninstall Filmroll</string>
+    <string name="shortcut_uninstall_disabled">Filmroll is not available</string>
 </resources>
