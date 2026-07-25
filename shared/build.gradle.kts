@@ -59,6 +59,14 @@ kotlin {
             implementation(libs.ktor.client.android)
             // AppCompatDelegate.setApplicationLocales backports per-app languages below API 33.
             implementation(libs.androidx.appcompat)
+            // The live viewfinder: CameraX drives the session, a GLSurfaceView owned by
+            // this module renders the frames through the LUT. camera-view is deliberately
+            // absent — PreviewView renders the feed itself and leaves no seam for a shader.
+            implementation(libs.androidx.camera.core)
+            implementation(libs.androidx.camera.camera2)
+            implementation(libs.androidx.camera.lifecycle)
+            // rememberLauncherForActivityResult, for the CAMERA runtime prompt.
+            implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.lifecycle.viewmodel.ktx)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.androidx.lifecycle.viewmodel.compose)
