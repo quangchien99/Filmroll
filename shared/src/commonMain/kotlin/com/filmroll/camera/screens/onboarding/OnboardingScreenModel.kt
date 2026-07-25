@@ -4,7 +4,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.filmroll.camera.data.source.SettingsRepository
 import com.filmroll.camera.resources.Res
-import com.filmroll.camera.resources.ic_film_negative_color
+import com.filmroll.camera.resources.onboarding_film_looks
 import com.filmroll.camera.resources.ic_film_print
 import com.filmroll.camera.resources.ic_upload_24
 import com.filmroll.camera.resources.onboarding_desc_1
@@ -31,7 +31,7 @@ enum class OnboardingPage(
     val description: StringResource,
 ) {
     FILM_LOOKS(
-        illustration = Res.drawable.ic_film_negative_color,
+        illustration = Res.drawable.onboarding_film_looks,
         title = Res.string.onboarding_title_1,
         description = Res.string.onboarding_desc_1,
     ),
