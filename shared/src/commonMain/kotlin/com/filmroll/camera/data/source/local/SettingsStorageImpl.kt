@@ -1,15 +1,18 @@
 package com.filmroll.camera.data.source.local
 
-import com.russhwolf.settings.ExperimentalSettingsApi
-import com.russhwolf.settings.ObservableSettings
-import com.russhwolf.settings.Settings
-import com.russhwolf.settings.get
-import com.russhwolf.settings.observable.makeObservable
-import com.russhwolf.settings.set
 import com.filmroll.camera.PlatformName
 import com.filmroll.camera.getPlatform
 import com.filmroll.camera.screens.settings.DefaultPickerType
 import com.filmroll.camera.screens.settings.ExportFormat
+import com.russhwolf.settings.ExperimentalSettingsApi
+import com.russhwolf.settings.ObservableSettings
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.coroutines.getStringFlow
+import com.russhwolf.settings.get
+import com.russhwolf.settings.observable.makeObservable
+import com.russhwolf.settings.set
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -46,6 +49,7 @@ class SettingsStorageImpl : SettingsStorage {
         set(value) {
             observableSettings[StorageKeys.EXPORT_FORMAT.key] = value.name
         }
+
     override var defaultPicker: DefaultPickerType
         get() = DefaultPickerType.valueOf(
             observableSettings[StorageKeys.DEFAULT_PICKER.key]
@@ -53,6 +57,40 @@ class SettingsStorageImpl : SettingsStorage {
         )
         set(value) {
             observableSettings[StorageKeys.DEFAULT_PICKER.key] = value.name
+        }
+
+    override var isLanguageChosen: Boolean
+        get() = observableSettings[StorageKeys.IS_LANGUAGE_CHOSEN.key] ?: false
+        set(value) {
+            observableSettings[StorageKeys.IS_LANGUAGE_CHOSEN.key] = value
+        }
+
+    override var languageTag: String?
+        get() = observableSettings[StorageKeys.LANGUAGE_TAG.key]
+        set(value) {
+            if (value == null) {
+                observableSettings.remove(StorageKeys.LANGUAGE_TAG.key)
+            } else {
+                observableSettings[StorageKeys.LANGUAGE_TAG.key] = value
+            }
+        }
+
+    override var isOnboardingFinished: Boolean
+        get() = observableSettings[StorageKeys.IS_ONBOARDING_FINISHED.key] ?: false
+        set(value) {
+            observableSettings[StorageKeys.IS_ONBOARDING_FINISHED.key] = value
+        }
+
+    override var themeMode: ThemeMode
+        get() = ThemeMode.fromName(observableSettings[StorageKeys.THEME_MODE.key])
+        set(value) {
+            observableSettings[StorageKeys.THEME_MODE.key] = value.name
+        }
+
+    override var dailyReminderEnabled: Boolean
+        get() = observableSettings[StorageKeys.DAILY_REMINDER_ENABLED.key] ?: false
+        set(value) {
+            observableSettings[StorageKeys.DAILY_REMINDER_ENABLED.key] = value
         }
 
     override fun defaultPickerListener(callback: (DefaultPickerType) -> Unit) {
@@ -64,9 +102,12 @@ class SettingsStorageImpl : SettingsStorage {
             })
     }
 
+    @OptIn(ExperimentalSettingsApi::class)
+    override fun themeModeFlow(): Flow<ThemeMode> =
+        observableSettings.getStringFlow(StorageKeys.THEME_MODE.key, ThemeMode.SYSTEM.name)
+            .map { ThemeMode.fromName(it) }
+
     override fun cleanStorage() {
         observableSettings.clear()
     }
-
-
 }
