@@ -193,4 +193,12 @@ internal class DefaultFilmRepository(
             localDataSource.clearFavoriteDatabase()
         }
     }
+
+    override suspend fun clearLocalData() {
+        withContext(Dispatchers.IO) {
+            localDataSource.clearFavoriteDatabase()
+            localDataSource.clearLutDatabase()
+            localDataSource.clearFilmDatabase()
+        }
+    }
 }

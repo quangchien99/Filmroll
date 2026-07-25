@@ -2,6 +2,9 @@ package com.filmroll.camera.util
 
 import com.filmroll.camera.screens.settings.ExportFormat
 import com.filmroll.camera.util.AppContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okio.FileSystem
 import okio.Path
 
 const val IMAGE_FILE_NAME = "image.jpeg"
@@ -47,3 +50,16 @@ expect suspend fun saveImageToGallery(
  * Create a directory
  */
 expect suspend fun createDirectory(directoryName: String)
+
+/**
+ * Delete everything the app has cached — source images, thumbnails and downloaded LUT files.
+ * Backs the debug-only "clear all app data" action.
+ */
+suspend fun clearAppCache() {
+    withContext(Dispatchers.Default) {
+        val fileSystem = FileSystem.SYSTEM
+        fileSystem.listOrNull(systemTemporaryPath)?.forEach { path ->
+            runCatching { fileSystem.deleteRecursively(path, mustExist = false) }
+        }
+    }
+}

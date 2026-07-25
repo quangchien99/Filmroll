@@ -54,4 +54,7 @@ interface FilmRepository {
     suspend fun removeFavoriteFilm(name: String): List<FavoriteLut>
 
     suspend fun clearFavoriteFilms()
+
+    /** Empties every local table. Used by the debug-only "clear all app data" action. */
+    suspend fun clearLocalData()
 }
