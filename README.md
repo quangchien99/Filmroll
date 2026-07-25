@@ -1,71 +1,133 @@
-# Film Simulator
-<p float="left">
-<img src="https://github.com/YahiaAngelo/Film-Simulator/blob/main/imgs/screenshots.jpg?raw=true" alt="screenshots"/>
-</p>
- <a href="https://apps.apple.com/us/app/film-simulator/id6736855160?itscg=30200&itsct=apps_box_badge&mttnsubad=6736855160" style="display: inline-block;">
- <img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us?releaseDate=1728950400" alt="Download on the App Store" style="width: 200px; height: 82px; vertical-align: middle; object-fit: contain;" />
- </a>
- <a href="https://play.google.com/store/apps/details?id=io.github.yahiaangelo.filmsimulator.android" target="_blank">
-  <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" style="width: 200px; height: 82px; vertical-align: middle; object-fit: contain;"/>
-</a>
+# Filmroll: Vintage Camera
 
+Filmroll is a Kotlin Multiplatform app for Android and iOS that gives digital photos the look of
+analog film. It applies 3D LUTs sampled from classic colour and black-and-white film stocks, lets
+you fine-tune the result, and exports at full resolution — optionally keeping the original EXIF
+metadata.
 
-## Overview
-FilmSimulator is a cross-platform mobile application developed using Kotlin Multiplatform and Compose UI Multiplatform. It is designed for both Android and iOS platforms. The app allows users to apply different film-like LUTs (Look-Up Tables) to their images, providing a unique aesthetic reminiscent of classic film styles.
+- **Package id:** `com.filmroll.camera`
+- **Platforms:** Android (minSdk 24, target 37) and iOS 16+
+- **UI:** Compose Multiplatform + Material 3
 
 ## Features
-- Apply film-like LUTs to any image.
-- Apply image adjustments like brightness, contrast, saturation, and more.
-- Simple and intuitive UI built with Compose UI and Material3.
-- Cross-platform functionality on both Android and iOS devices.
 
-## Technologies and Libraries
-This project leverages the following technologies and libraries:
-- **Compose UI**: Used to build the UI components in a declarative style across both platforms.
-- **Material3**: Implements Material Design 3 components for a modern, cohesive look and feel.
-- **Compose Resources**: Helps manage resources in a multiplatform environment.
-- **FFMPEG-Kit**: Used to apply Lut files to images.
-- **Skiko**: Used for rendering images and applying RuntimeShaders.
-- **SQLDelight**: Used for local database.
-- **Ktor**: Utilized for network operations.
-- **Voyager Navigation**: Manages navigation in the app.
-- **Koin DI**: Provides dependency injection to manage object creation.
-- **Peekaboo Image Picker**: Allows users to pick images from their device.
-- **Okio**: Handles I/O operations efficiently.
-- **Multiplatform Settings**: Manages user settings consistently across platforms.
-- **ImageLoader**: Used for efficient image loading and processing.
+- Apply film-like 3D LUTs to any photo, with a thumbnail preview generated per LUT.
+- Fine-tune exposure, contrast, shadows, highlights, saturation, temperature and grain.
+- Favourite the looks you keep coming back to.
+- Download the full LUT library for offline use.
+- Export as JPEG, or in the source format with EXIF metadata preserved.
+- First-run flow: **splash → language → onboarding → home**.
+- 11 languages, switchable at runtime from Settings.
+- Light / dark / follow-system theming.
+- Opt-in daily reminder notification.
+- Launcher "Uninstall" shortcut.
+- Debug builds get a **clear all app data** action so the onboarding flow can be replayed.
 
-## Architecture
-The app follows the MVVM (Model-View-ViewModel) architecture and makes use of Kotlin flows for reactive data handling, which helps in managing the UI state reactively across both Android and iOS platforms.
+## Project layout
 
-## LUTs Acknowledgment
-The Film LUTs used in this app are sourced from a public repository and are not owned by FilmSimulator. You can find them at [YahiaAngelo/Film-Luts](https://github.com/YahiaAngelo/Film-Luts) on GitHub.
+```
+shared/                  Kotlin Multiplatform module — all business logic and UI
+  src/commonMain/        Shared Compose UI, screen models, repositories, resources
+  src/androidMain/       Android actuals: file/gallery IO, notifications, locale
+  src/iosMain/           iOS actuals: Photos export, notifications, locale
+androidApp/              Android entry point (Application, MainActivity, launcher resources)
+iosApp/                  Xcode project wrapping the shared Compose UI
+```
 
-## Getting Started
+Everything lives under the `com.filmroll.camera` package.
 
-### Prerequisites
-- Android Studio Arctic Fox or newer
-- Xcode 13 or newer (for iOS)
-- Kotlin Multiplatform Mobile Plugin (for Android Studio)
+### Architecture
 
-### Building the Project
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/YahiaAngelo/Film-Simulator.git
-2. Open the project in Android Studio.
-3. To run the Android app, select the 'androidApp' module in the configuration dropdown and hit 'Run'.
-4. To run the iOS app, open the iosApp directory in Xcode and run the project on a simulator or actual device.
+- **MVVM** using Voyager `ScreenModel`s with Kotlin flows for state.
+- **Repository pattern** over local (SQLDelight) and network (Ktor) data sources.
+- **Koin** for dependency injection; modules are aggregated in `di/AppModule.kt`.
+- **Compose Resources** for strings, drawables and bundled LUT files, so both platforms read the
+  same translated resources.
 
-## Contributing
+### Key modules
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated.
+| Path | Responsibility |
+| --- | --- |
+| `screens/splash` | Cold-start branding; decides the first destination |
+| `screens/language` | Language picker — first-run step and Settings entry |
+| `screens/onboarding` | Three-page intro pager |
+| `screens/home` | Image picking, LUT selection, adjustments, export |
+| `screens/settings` | Appearance, language, notifications, export options, debug tools |
+| `data/source/FilmRepository` | LUT data from the local DB and the network |
+| `data/source/local/SettingsStorage` | Key-value preferences, including the onboarding flags |
+| `lut/LutDownloadManager` | Downloads and caches `.cube` LUT files |
+| `image/SkiaImageProcessor` | Skia runtime-shader LUT and adjustment pipeline |
+| `notification/DailyReminder` | Daily reminder scheduling on both platforms |
+| `util/AppEnvironment` | Debug detection, locale application, app restart |
 
-1. Fork the Project
-2. Create your Feature Branch (git checkout -b feature/AmazingFeature)
-3. Commit your Changes (git commit -m 'Add some AmazingFeature')
-4. Push to the Branch (git push origin feature/AmazingFeature)
-5. Open a Pull Request
+## Building
+
+### Android
+
+```bash
+./gradlew androidApp:assembleDebug     # debug APK
+./gradlew androidApp:assembleRelease   # R8-minified release APK
+./gradlew androidApp:installDebug      # install on a connected device
+```
+
+Release builds run R8 with resource shrinking; keep rules live in
+`androidApp/proguard-rules.pro`.
+
+### iOS
+
+```bash
+./gradlew shared:compileKotlinIosSimulatorArm64   # compile the shared module
+open iosApp/iosApp.xcworkspace                    # then build and run from Xcode
+```
+
+The iOS app consumes the shared module through CocoaPods. If the workspace has not been set up
+yet, run `./gradlew :shared:generateDummyFramework` and then `pod install` inside `iosApp/`.
+
+### Everything
+
+```bash
+./gradlew clean
+./gradlew build
+```
+
+## Localization
+
+UI strings live in `shared/src/commonMain/composeResources/values/strings.xml`, with translations in
+sibling `values-<qualifier>` folders. Shipped locales: English, Vietnamese, Spanish, French, German,
+Portuguese (Brazil), Japanese, Korean, Simplified Chinese, Hindi and Indonesian. Missing keys fall
+back to English.
+
+Adding a language means adding a `values-<qualifier>/strings.xml` folder **and** an entry in
+`i18n/AppLanguage.kt` — the picker only lists locales the app actually ships strings for.
+
+Runtime switching uses per-app locales: `AppCompatDelegate.setApplicationLocales` on Android (which
+is why `MainActivity` is an `AppCompatActivity` with an AppCompat theme), and the `AppleLanguages`
+default on iOS, where the change takes effect on the next launch.
+
+## Development notes
+
+- **Threading:** image processing runs on `Dispatchers.IO`; the LUT pipeline is Skia-based and
+  shared between platforms.
+- **Memory:** large bitmaps need careful recycling on Android; exports stream through the app
+  cache directory.
+- **Permissions:** gallery access and `POST_NOTIFICATIONS` are platform-specific.
+  `NotificationPermission` bridges the Android runtime prompt into the shared module, since the
+  shared code cannot reach an `Activity`.
+- **Debug tooling:** `isDebugBuild` gates the Settings → Debug section. Clearing app data wipes
+  preferences, the local database and the cache, then relaunches at the splash screen.
+
+## LUTs acknowledgment
+
+The film LUTs are sourced from the public
+[YahiaAngelo/Film-Luts](https://github.com/YahiaAngelo/Film-Luts) repository and are not owned by
+this project.
+
+## Credits
+
+Filmroll started as a fork of the MIT-licensed
+[Film Simulator](https://github.com/YahiaAngelo/Film-Simulator) project by YahiaAngelo, and has
+since been rebranded and extended.
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See [`LICENSE.txt`](LICENSE.txt).

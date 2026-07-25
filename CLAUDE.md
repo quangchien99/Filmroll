@@ -4,110 +4,112 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Film Simulator is a cross-platform mobile app built with Kotlin Multiplatform and Compose UI. It applies film-like LUTs (Look-Up Tables) and image adjustments to photos on Android and iOS.
+Filmroll ("Filmroll: Vintage Camera", applicationId `com.filmroll.camera`) is a cross-platform
+mobile app built with Kotlin Multiplatform and Compose Multiplatform. It applies film-like 3D LUTs
+and image adjustments to photos on Android and iOS.
 
-**Key Migration**: The project recently migrated from FFmpeg-kit to platform-native implementations:
-- **Android**: Custom C++ implementation using Android NDK
-- **iOS**: Core Graphics-based implementation (simplified from original Metal approach)
+It began as a fork of [YahiaAngelo/Film-Simulator](https://github.com/YahiaAngelo/Film-Simulator)
+and has since been rebranded, repackaged and extended.
 
 ## Build Commands
 
 ### Android
 ```bash
-# Build shared module
-./gradlew shared:assembleDebug
-
-# Build Android app
-./gradlew androidApp:assembleDebug
-
-# Install on device
-./gradlew androidApp:installDebug
+./gradlew androidApp:assembleDebug      # debug APK
+./gradlew androidApp:assembleRelease    # R8-minified release APK
+./gradlew androidApp:installDebug       # install on a device
 ```
 
 ### iOS
 ```bash
-# Build iOS framework
+./gradlew shared:compileKotlinIosSimulatorArm64   # fastest way to type-check iosMain
 ./gradlew shared:linkDebugFrameworkIosSimulatorArm64
-
-# Open iOS project (then build in Xcode)
-open iosApp/iosApp.xcodeproj
+open iosApp/iosApp.xcworkspace
 ```
 
 ### Cross-platform
 ```bash
-# Clean all
 ./gradlew clean
-
-# Build all targets
 ./gradlew build
 ```
 
+The first build on a clean machine downloads a JetBrains JDK 21 toolchain and the Kotlin/Native
+distribution — expect 20+ minutes before any task output appears. Gradle's configuration cache is
+enabled, so two builds cannot run against this project concurrently.
+
 ## Architecture
 
-### Multiplatform Structure
-- **`shared/src/commonMain/`**: Shared business logic, UI, and utilities
-- **`shared/src/androidMain/`**: Android-specific implementations + C++ native code
-- **`shared/src/iosMain/`**: iOS-specific implementations
-- **`androidApp/`**: Android app entry point
-- **`iosApp/`**: iOS app entry point
+### Multiplatform structure
+- **`shared/src/commonMain/`**: shared business logic, Compose UI, resources
+- **`shared/src/androidMain/`**: Android actuals + the shared module's own AndroidManifest
+- **`shared/src/iosMain/`**: iOS actuals
+- **`androidApp/`**: Android entry point
+- **`iosApp/`**: iOS entry point
 
-### Core Architecture Patterns
-- **MVVM**: Uses Voyager ScreenModels with Kotlin flows for reactive state management
-- **Repository Pattern**: Data layer with local (SQLDelight) and network (Ktor) sources
-- **Dependency Injection**: Koin DI manages object creation across all modules
+Every Kotlin source lives under `com.filmroll.camera`. Compose Resources generate into
+`com.filmroll.camera.resources` (pinned in `shared/build.gradle.kts`, not derived from the project
+name), and SQLDelight generates into `com.filmroll.camera`.
 
-### Critical Native Components
-The app's core image processing happens in platform-native code:
+### Core patterns
+- **MVVM** with Voyager `ScreenModel`s and Kotlin flows
+- **Repository pattern** over SQLDelight (local) and Ktor (network)
+- **Koin** DI; every module is registered in `di/AppModule.kt` — a new screen model needs an entry
+  there or `koinScreenModel<T>()` will throw at runtime
 
-**Android C++ (shared/src/androidMain/cpp/)**:
-- `lut_processor.cpp`: 3D LUT processing with trilinear interpolation
-- `image_processor.cpp`: Bitmap manipulation and JNI bridge
-- `film_grain.cpp`: Grain effect generation
-- `jni_bridge.cpp`: Kotlin ↔ C++ interface
-- `NativeLUTProcessor.kt`: Kotlin wrapper for C++ functions
+### Navigation
+`App()` hosts a Voyager `Navigator` rooted at `SplashScreen`. Splash reads the stored flags and
+`replaceAll`s to the first screen the user still owes us:
 
-**iOS Implementation (shared/src/iosMain/)**:
-- `MetalLUTProcessor.kt`: Core Graphics-based image processing
-- Handles thumbnail creation and basic image transformations
+```
+SplashScreen → LanguageScreen(isFirstLaunch = true) → OnboardingScreen → HomeScreen
+```
 
-### Key Modules
-- **`screens/home/HomeScreenModel`**: Main app logic, image processing orchestration
-- **`data/source/FilmRepository`**: Manages LUT data from local DB and network
-- **`lut/LutDownloadManager`**: Downloads and caches LUT files
-- **`image/ImageRenderer`**: Compose UI rendering with runtime shaders
-- **`util/FFMPEGHandler`**: Platform abstraction for native image processing
+Returning users skip straight to `HomeScreen`. `LanguageScreen(isFirstLaunch = false)` is the
+Settings entry and pops instead of continuing.
 
-### Data Flow
-1. User selects image via Peekaboo Image Picker
-2. Image saved to temporary cache (FileHandler)
-3. HomeScreenModel coordinates LUT application via FFMPEGHandler
-4. Platform-specific native code processes image
-5. Result rendered in Compose UI via ImageRenderer
-6. Export saves processed image to gallery
+### Image processing pipeline
+1. **Load** — image picked via FileKit, copied into the app cache (`FileHandler`)
+2. **Process** — `SkiaImageProcessor` applies the LUT and adjustments via runtime shaders
+3. **Thumbnail** — generated per LUT for the picker
+4. **Export** — full resolution to the gallery, JPEG or source format with EXIF
 
 ## Development Notes
 
-### Native Code Development
-- Android C++ requires CMake 3.22.1+
-- Changes to .cpp files need `./gradlew clean` to rebuild native libs
-- Use Android NDK logging macros (LOGI, LOGE) for debugging
-- iOS implementation is Core Graphics-based, avoiding complex Metal interop
+### Preferences
+`SettingsStorage` (multiplatform-settings) holds export options plus the flow-control flags:
+`isLanguageChosen`, `languageTag`, `isOnboardingFinished`, `themeMode`, `dailyReminderEnabled`.
+`themeModeFlow()` is collected in `App()`, so theme changes apply without a restart.
 
-### Image Processing Pipeline
-The app processes images through this flow:
-1. **Load**: Image loaded from file system
-2. **Cache**: Stored in app's temporary directory
-3. **Process**: Native code applies LUT transformations
-4. **Thumbnail**: Generated for UI preview (320px width)
-5. **Export**: Full resolution saved to device gallery
+### Localization
+Strings live in `composeResources/values/strings.xml` with `values-<qualifier>` translations for 10
+further locales. **Adding a language requires both** a `values-<qualifier>` folder and an
+`AppLanguage` entry — the picker only lists locales with shipped strings.
 
-### Platform Considerations
-- **Android**: Minimum SDK 24, supports RGBA_8888 bitmaps only
-- **iOS**: Uses UIKit for image handling, UIImage for processing
-- **Shared**: Compose Resources manage assets consistently
+Runtime switching goes through `applyAppLanguage()`: `AppCompatDelegate.setApplicationLocales` on
+Android (hence `AppCompatActivity` + an AppCompat theme; do not revert either), and `AppleLanguages`
+on iOS, which returns `false` to signal that a relaunch is needed.
 
-### Common Issues
-- **Memory**: Large images need careful bitmap recycling on Android
-- **Threading**: Image processing runs on Dispatchers.IO
-- **Permissions**: Gallery access requires platform-specific handling
-- **Build**: Native code changes require clean builds
+### Notifications
+`DailyReminder` is an `expect object`. Android uses an inexact repeating AlarmManager alarm plus
+`BootCompletedReceiver` to survive reboots; iOS uses a repeating `UNCalendarNotificationTrigger`.
+`setEnabled(true)` returns whether the reminder was *actually* scheduled, and the Settings switch
+only stores `true` when it was — do not simplify that away, or the switch will lie.
+
+The Android POST_NOTIFICATIONS prompt needs an Activity the shared module cannot see, so
+`MainActivity` installs a callback into `NotificationPermission.requester`.
+
+### Debug tooling
+`isDebugBuild` (Android: `FLAG_DEBUGGABLE`; iOS: `Platform.isDebugBinary`) gates Settings → Debug.
+"Clear all app data" wipes preferences, local tables and cache, then relaunches — the relaunch waits
+for the wipe to finish, since firing it inline kills the process mid-write.
+
+### Release builds
+R8 and resource shrinking are on. Keep rules are in `androidApp/proguard-rules.pro` and cover
+Koin-resolved classes, the manifest-only receivers, enums round-tripped through `valueOf()`, and
+skiko. Adding reflection or a new receiver usually means adding a rule.
+
+### Common issues
+- **Memory**: large bitmaps need careful recycling on Android
+- **Threading**: image processing runs on `Dispatchers.IO`
+- **Permissions**: gallery access is platform-specific
+- **Build**: Gradle's configuration cache lock means only one build at a time
