@@ -25,4 +25,57 @@
     <string name="cancel">Cancel</string>
     <string name="about_text">Filmroll is a tool to simulate the look of analog film using 3D LUTs. It is a free and open-source project. You can find the source code on GitHub.</string>
 
+    <!-- Splash -->
+    <string name="splash_tagline">Shoot digital. Feel analog.</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_1">Real film looks</string>
+    <string name="onboarding_desc_1">Apply authentic 3D LUTs captured from classic colour and black-and-white film stocks.</string>
+    <string name="onboarding_title_2">Fine-tune every frame</string>
+    <string name="onboarding_desc_2">Dial in exposure, contrast, saturation and grain until the shot feels exactly right.</string>
+    <string name="onboarding_title_3">Export in full quality</string>
+    <string name="onboarding_desc_3">Save straight to your gallery at full resolution, with the original metadata if you want it.</string>
+    <string name="action_next">Next</string>
+    <string name="action_skip">Skip</string>
+    <string name="action_get_started">Get Started</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_apply">Apply</string>
+
+    <!-- Language -->
+    <string name="language">Language</string>
+    <string name="language_title">Choose your language</string>
+    <string name="language_search_hint">Search language</string>
+    <string name="language_suggested">Suggested</string>
+    <string name="language_all">All languages</string>
+    <string name="language_restart_required">Restart the app to finish switching language.</string>
+
+    <!-- Appearance -->
+    <string name="appearance">Appearance</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="dark_mode_summary">Use the dark colour scheme</string>
+    <string name="theme_mode">Theme</string>
+    <string name="theme_mode_system">Follow system</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+
+    <!-- Notifications -->
+    <string name="notifications">Notifications</string>
+    <string name="daily_reminder">Daily reminder</string>
+    <string name="daily_reminder_summary">A gentle nudge once a day to develop a new shot</string>
+    <string name="notification_channel_daily">Daily reminder</string>
+    <string name="notification_daily_title">Your darkroom is waiting</string>
+    <string name="notification_daily_content">Pick a photo and give it a fresh film look today.</string>
+    <string name="notification_permission_denied">Enable notifications in system settings to get daily reminders.</string>
+
+    <!-- LUTs -->
+    <string name="download_luts">Download LUTs</string>
+    <string name="download_luts_summary">Download every film LUT for offline use</string>
+
+    <!-- Debug -->
+    <string name="debug">Debug</string>
+    <string name="debug_clear_data">Clear all app data</string>
+    <string name="debug_clear_data_summary">Wipe preferences and cached files, then replay onboarding</string>
+    <string name="debug_clear_data_confirm">Clear all app data? The app will restart at the splash screen.</string>
+    <string name="debug_clear_data_done">All app data cleared.</string>
+    <string name="clear">Clear</string>
 </resources>

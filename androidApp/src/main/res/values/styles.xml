@@ -1,3 +1,5 @@
 <resources>
-    <style name="AppTheme" parent="android:Theme.Material.NoActionBar"/>
+    <!-- AppCompat parent is required by AppCompatActivity, which in turn is what makes
+         per-app language switching work on API levels below 33. -->
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar" />
 </resources>

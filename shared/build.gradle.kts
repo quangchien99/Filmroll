@@ -57,6 +57,8 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.android)
+            // AppCompatDelegate.setApplicationLocales backports per-app languages below API 33.
+            implementation(libs.androidx.appcompat)
             implementation(libs.androidx.lifecycle.viewmodel.ktx)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.androidx.lifecycle.viewmodel.compose)
