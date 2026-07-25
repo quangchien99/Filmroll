@@ -62,17 +62,50 @@ name), and SQLDelight generates into `com.filmroll.camera`.
 
 ```
 SplashScreen → LanguageScreen(isFirstLaunch = true) → OnboardingScreen → HomeScreen
+                                                                            ↕
+                                                                       CameraScreen
 ```
 
 Returning users skip straight to `HomeScreen`. `LanguageScreen(isFirstLaunch = false)` is the
-Settings entry and pops instead of continuing.
+Settings entry and pops instead of continuing. `CameraScreen` is pushed from the editor and pops
+back; because the editor is the navigator root it cannot take the shot as a constructor argument,
+so the capture travels over `CaptureRelay` (a Koin `single`) and `HomeScreenModel` consumes it.
 
 ### Image processing pipeline
-1. **Load** — image picked via FileKit, copied into the app cache (`FileHandler`)
+1. **Load** — image picked via FileKit *or shot in the viewfinder*, copied into the app cache
+   (`FileHandler`)
 2. **Process** — `SkiaImageProcessor` applies the LUT and adjustments via runtime shaders
 3. **Thumbnail** — the user's own photo is re-rendered through each LUT on the visible shelf,
    so the film strip previews the actual picture rather than a stock sample
 4. **Export** — full resolution to the gallery, JPEG or source format with EXIF
+
+`image/CubeLut.kt` parses `.cube` files and packs them for each consumer (`toRgba8()` for Skia and
+GLES, `toRgbaFloats()` for Core Image). It is the single source of truth — three renderers draw the
+same film, and a stock must not look different depending on which one drew it.
+
+### Live camera
+`capture/` is an `expect class FilmrollCamera` plus a `CameraViewfinder` composable and a
+permission state. Both platforms deliberately skip the stock preview widget (`PreviewView`,
+`AVCaptureVideoPreviewLayer`): they render the sensor feed themselves and leave no seam for a LUT.
+
+- **Android** — CameraX drives the session; `Preview` is pointed at a `SurfaceTexture` owned by
+  `ViewfinderRenderer`, a `GLSurfaceView` renderer that samples the external OES texture through
+  the packed LUT texture in one GLES 2.0 pass (`ViewfinderShader`, a narrow port of the SkSL with
+  identical constants). Orientation is handled entirely in texture coordinates — rotating the quad
+  looks simpler and is wrong, because NDC is already stretched to the viewport.
+- **iOS** — `AVCaptureVideoDataOutput` frames go through a Core Image chain
+  (`CIColorCubeWithColorSpace` in sRGB, `CIColorControls`, `CIColorMatrix`) and land in a
+  `UIImageView`. Strength is baked into the cube via `CubeLut.mixedWithIdentity()` rather than
+  blended per frame, because Core Image has no primitive that extrapolates past a full-strength LUT.
+
+The viewfinder renders LUT strength, contrast, saturation, warmth and grain — the subset that holds
+30-60 fps. Exposure is *not* in it: `ViewfinderTool.EXPOSURE` biases the sensor through the camera's
+own exposure compensation, so a brightened frame carries real data instead of a stretched copy.
+Shadows, highlights and fringing are editor-only.
+
+The still is captured **unfiltered** and pushed through the same `SkiaImageProcessor` the editor
+exports with, at full resolution and full grain quality. The preview is never the source of the
+saved frame — keep it that way.
 
 ### Design system
 `theme/` holds the "Darkroom" system: a warm-neutral palette with a safelight-amber primary
@@ -134,5 +167,7 @@ skiko. Adding reflection or a new receiver usually means adding a rule.
 ### Common issues
 - **Memory**: large bitmaps need careful recycling on Android
 - **Threading**: image processing runs on `Dispatchers.IO`
-- **Permissions**: gallery access is platform-specific
+- **Permissions**: gallery access is platform-specific. Camera access is `CameraPermissionState`;
+  Android cannot tell "never asked" from "refused" without an Activity, so it reports both as
+  `UNKNOWN` and lets the launcher settle it — a prior refusal returns `false` with no prompt
 - **Build**: Gradle's configuration cache lock means only one build at a time
