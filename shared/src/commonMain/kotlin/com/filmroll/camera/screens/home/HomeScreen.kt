@@ -28,8 +28,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.Compare
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.SaveAlt
@@ -74,6 +74,7 @@ import com.filmroll.camera.resources.action_change_photo
 import com.filmroll.camera.resources.action_choose_photo
 import com.filmroll.camera.resources.action_compare
 import com.filmroll.camera.resources.action_export
+import com.filmroll.camera.resources.action_open_camera
 import com.filmroll.camera.resources.action_reset
 import com.filmroll.camera.resources.badge_original
 import com.filmroll.camera.resources.category_favorites
@@ -85,6 +86,7 @@ import com.filmroll.camera.resources.home_empty_title
 import com.filmroll.camera.resources.no_favorites_body
 import com.filmroll.camera.resources.settings
 import com.filmroll.camera.resources.strip_browse
+import com.filmroll.camera.screens.camera.CameraScreen
 import com.filmroll.camera.screens.settings.DefaultPickerType
 import com.filmroll.camera.screens.settings.SettingsScreen
 import com.filmroll.camera.theme.FilmrollTheme
@@ -185,7 +187,10 @@ class HomeScreen : Screen {
                     if (state.hasImage) {
                         PhotoCanvas(state = state)
                     } else {
-                        WelcomePane(onChoosePhoto = imagePicker::launch)
+                        WelcomePane(
+                            onOpenCamera = { navigator.push(CameraScreen()) },
+                            onChoosePhoto = imagePicker::launch,
+                        )
                     }
 
                     TopScrim()
@@ -194,6 +199,7 @@ class HomeScreen : Screen {
                         hasImage = state.hasImage,
                         comparing = !state.showAdjustments,
                         canReset = state.hasEdits,
+                        onOpenCamera = { navigator.push(CameraScreen()) },
                         onPickImage = imagePicker::launch,
                         onCompareChange = vm::setShowOriginal,
                         onReset = vm::resetImage,
@@ -340,6 +346,7 @@ private fun TopChrome(
     hasImage: Boolean,
     comparing: Boolean,
     canReset: Boolean,
+    onOpenCamera: () -> Unit,
     onPickImage: () -> Unit,
     onCompareChange: (Boolean) -> Unit,
     onReset: () -> Unit,
@@ -355,6 +362,13 @@ private fun TopChrome(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (hasImage) {
+            ChromeIconButton(
+                onClick = onOpenCamera,
+                imageVector = Icons.Rounded.PhotoCamera,
+                contentDescription = stringResource(Res.string.action_open_camera),
+                tint = tokens.onCanvas,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             ChromeIconButton(
                 onClick = onPickImage,
                 imageVector = Icons.Rounded.PhotoLibrary,
@@ -471,8 +485,19 @@ private fun OriginalBadge(visible: Boolean, modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * The empty editor.
+ *
+ * Two ways in, and the order is the argument: shooting through the film is the
+ * thing this app can do that a photo library cannot, so it leads. Importing an
+ * existing frame is still one tap away, just no longer the only door.
+ */
 @Composable
-private fun WelcomePane(onChoosePhoto: () -> Unit, modifier: Modifier = Modifier) {
+private fun WelcomePane(
+    onOpenCamera: () -> Unit,
+    onChoosePhoto: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val tokens = FilmrollTheme.tokens
 
     Column(
@@ -490,7 +515,7 @@ private fun WelcomePane(onChoosePhoto: () -> Unit, modifier: Modifier = Modifier
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = Icons.Rounded.AddPhotoAlternate,
+                imageVector = Icons.Rounded.PhotoCamera,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(40.dp),
@@ -521,21 +546,44 @@ private fun WelcomePane(onChoosePhoto: () -> Unit, modifier: Modifier = Modifier
             modifier = Modifier
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary)
-                .clickable(onClick = onChoosePhoto)
+                .clickable(onClick = onOpenCamera)
                 .padding(horizontal = 26.dp, vertical = 15.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = Icons.Rounded.PhotoLibrary,
+                imageVector = Icons.Rounded.PhotoCamera,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(18.dp),
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = stringResource(Res.string.action_choose_photo),
+                text = stringResource(Res.string.action_open_camera),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimary,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable(onClick = onChoosePhoto)
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.PhotoLibrary,
+                contentDescription = null,
+                tint = tokens.onCanvasVariant,
+                modifier = Modifier.size(17.dp),
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = stringResource(Res.string.action_choose_photo),
+                style = MaterialTheme.typography.labelLarge,
+                color = tokens.onCanvasVariant,
             )
         }
     }

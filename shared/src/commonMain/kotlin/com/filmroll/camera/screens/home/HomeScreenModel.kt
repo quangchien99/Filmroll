@@ -7,6 +7,8 @@ import io.github.vinceglb.filekit.core.PlatformFile
 import io.github.vinceglb.filekit.core.extension
 import com.filmroll.camera.FavoriteLut
 import com.filmroll.camera.FilmLut
+import com.filmroll.camera.capture.CaptureRelay
+import com.filmroll.camera.capture.CapturedPhoto
 import com.filmroll.camera.data.source.FilmRepository
 import com.filmroll.camera.data.source.SettingsRepository
 import com.filmroll.camera.data.source.toFavoriteLut
@@ -16,6 +18,7 @@ import com.filmroll.camera.lut.LutDownloadManager
 import com.filmroll.camera.resources.Res
 import com.filmroll.camera.resources.loading_exporting
 import com.filmroll.camera.resources.loading_saving
+import com.filmroll.camera.resources.msg_capture_failed
 import com.filmroll.camera.resources.msg_catalog_refresh_failed
 import com.filmroll.camera.resources.msg_choose_image_first
 import com.filmroll.camera.resources.msg_export_failed
@@ -55,7 +58,7 @@ import com.filmroll.camera.util.saveImageToGallery
 import kotlin.coroutines.cancellation.CancellationException
 
 val homeScreenModule = module {
-    factory { HomeScreenModel(get(), get(), get()) }
+    factory { HomeScreenModel(get(), get(), get(), get()) }
 }
 
 /** Debounce window before re-rendering the preview after a slider change. */
@@ -147,6 +150,7 @@ data class HomeScreenModel(
     val repository: FilmRepository,
     val settingsRepository: SettingsRepository,
     val lutDownloadManager: LutDownloadManager,
+    val captureRelay: CaptureRelay,
 ) : ScreenModel {
 
     private val _uiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
@@ -177,6 +181,7 @@ data class HomeScreenModel(
     init {
         refresh()
         addSettingsListeners()
+        observeCaptures()
         screenModelScope.launch {
             lutDownloadManager.uiState.collect { downloadState ->
                 updateUiState {
@@ -403,6 +408,59 @@ data class HomeScreenModel(
             refreshThumbnailsForShelf()
             requestPreview()
         }
+    }
+
+    /**
+     * Picks up frames shot in the viewfinder.
+     *
+     * The editor is the navigator root, so a capture cannot arrive as a screen
+     * argument — it comes over [CaptureRelay] instead, and is consumed on arrival
+     * so a configuration change doesn't re-import the same frame.
+     */
+    private fun observeCaptures() {
+        screenModelScope.launch {
+            captureRelay.pending.filterNotNull().collect { captured ->
+                captureRelay.consume(captured)
+                try {
+                    adoptCapture(captured)
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    showMessage(getString(Res.string.msg_capture_failed))
+                }
+            }
+        }
+    }
+
+    private suspend fun adoptCapture(captured: CapturedPhoto) {
+        // Already JPEG, so no format conversion — but the still carries its
+        // rotation in EXIF and Skia reads pixels, not metadata.
+        fixImageOrientation(image = captured.fileName)
+        originalImageFileName = captured.originalFileName
+
+        val bytes = withContext(Dispatchers.IO) { readImageFile(captured.fileName) }
+        sourceBytes = bytes
+        processor.clearCache()
+
+        // The viewfinder's own settings open the editor, so the first thing on
+        // screen is the frame as it was composed rather than a neutral render of it.
+        currentAdjustments = captured.adjustments
+        currentLutBytes = null
+        updateUiState {
+            it.copy(
+                hasImage = true,
+                imageAdjustments = captured.adjustments,
+                filmThumbnails = emptyMap(),
+                selectedFilm = null,
+            )
+        }
+
+        refreshThumbnailsForShelf()
+
+        val film = captured.filmName?.let { name ->
+            _uiState.value.filmLuts.firstOrNull { it.name == name }
+                ?: repository.getFilms(false).firstOrNull { it.name == name }
+        }
+        if (film != null) selectFilmLut(film) else requestPreview()
     }
 
     fun snackbarMessageShown() = updateUiState { it.copy(userMessage = null) }
