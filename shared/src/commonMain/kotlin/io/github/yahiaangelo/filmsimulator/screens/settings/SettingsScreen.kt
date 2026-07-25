@@ -339,7 +339,7 @@ class SettingsScreen : Screen {
                 },
                 secondaryText = {
                     Text(
-                        text = "YahiaAngelo",
+                        text = "Quang Chien Pham",
                         style = MaterialTheme.typography.labelMedium,
                     )
                 }
@@ -355,7 +355,7 @@ class SettingsScreen : Screen {
                 secondaryText = {
                     Text(
                         AnnotatedString.rememberAutoLinkText(
-                            "https://github.com/YahiaAngelo".trimMargin()
+                            "https://github.com/quangchien99/Filmroll".trimMargin()
                         ),
                         style = MaterialTheme.typography.labelMedium,
                     )
@@ -372,7 +372,7 @@ class SettingsScreen : Screen {
                 secondaryText = {
                     Text(
                         AnnotatedString.rememberAutoLinkText(
-                            "https://x.com/YahiaDev".trimMargin()
+                            "phamquangchien170499@gmail.com".trimMargin()
                         ),
                         style = MaterialTheme.typography.labelMedium,
                     )

@@ -1,4 +1,6 @@
-Copyright (c) 2012-2024 Scott Chacon and others
+MIT License
+
+Copyright (c) 2026 Quang Chien Pham
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -18,3 +20,10 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---
+
+Filmroll started as a fork of the MIT-licensed Film Simulator project
+(https://github.com/YahiaAngelo/Film-Simulator), Copyright (c) YahiaAngelo.
+That notice is kept here because the MIT license requires it for the parts of
+this work derived from that project.
