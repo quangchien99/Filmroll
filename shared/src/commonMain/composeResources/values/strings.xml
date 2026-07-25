@@ -30,7 +30,7 @@
 
     <!-- Onboarding -->
     <string name="onboarding_title_1">Real film looks</string>
-    <string name="onboarding_desc_1">Apply authentic 3D LUTs captured from classic colour and black-and-white film stocks.</string>
+    <string name="onboarding_desc_1">Frame your shot through authentic 3D LUTs taken from classic colour and black-and-white film stocks — live, before the shutter.</string>
     <string name="onboarding_title_2">Fine-tune every frame</string>
     <string name="onboarding_desc_2">Dial in exposure, contrast, saturation and grain until the shot feels exactly right.</string>
     <string name="onboarding_title_3">Export in full quality</string>
@@ -86,7 +86,7 @@
     <string name="film_none">None</string>
     <string name="strip_browse">All</string>
     <string name="home_empty_title">Load a frame</string>
-    <string name="home_empty_body">Pick a photo and try it on real film stocks — grain, colour and all.</string>
+    <string name="home_empty_body">Shoot through a film stock, or bring in a photo you already have.</string>
     <string name="no_favorites_body">Press and hold a film to keep it on this shelf.</string>
 
     <!-- Film library -->
@@ -135,4 +135,22 @@
     <!-- Settings -->
     <string name="settings_editing">Editing</string>
     <string name="settings_export_quality_summary">Higher quality means larger files</string>
+
+    <!-- Camera -->
+    <string name="action_open_camera">Take a photo</string>
+    <string name="action_shutter">Take photo</string>
+    <string name="action_flip_camera">Switch camera</string>
+    <string name="action_grid">Grid</string>
+    <string name="action_allow_camera">Allow camera</string>
+    <string name="action_open_settings">Open settings</string>
+    <string name="flash_off">Flash off</string>
+    <string name="flash_auto">Flash auto</string>
+    <string name="flash_on">Flash on</string>
+    <string name="camera_tab_look">Look</string>
+    <string name="camera_frames_label">Frames</string>
+    <string name="camera_starting">Starting the camera…</string>
+    <string name="camera_permission_title">Filmroll needs your camera</string>
+    <string name="camera_permission_body">Allow camera access to frame your shot through a film stock.</string>
+    <string name="camera_permission_denied_body">Camera access is off. Turn it on in Settings to shoot through film.</string>
+    <string name="msg_capture_failed">Couldn't take that shot. Please try again.</string>
 </resources>

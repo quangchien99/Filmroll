@@ -23,7 +23,7 @@
     <string name="about_text">Filmroll simuliert den Look von analogem Film mit 3D-LUTs. Es ist ein kostenloses Open-Source-Projekt. Den Quellcode findest du auf GitHub.</string>
     <string name="splash_tagline">Digital fotografieren. Analog fühlen.</string>
     <string name="onboarding_title_1">Echte Film-Looks</string>
-    <string name="onboarding_desc_1">Wende authentische 3D-LUTs an, die von klassischen Farb- und Schwarzweißfilmen stammen.</string>
+    <string name="onboarding_desc_1">Sieh dein Motiv schon vor dem Auslösen durch echte 3D-LUTs klassischer Farb- und Schwarzweißfilme.</string>
     <string name="onboarding_title_2">Jedes Bild feinjustieren</string>
     <string name="onboarding_desc_2">Stelle Belichtung, Kontrast, Sättigung und Korn ein, bis die Aufnahme genau passt.</string>
     <string name="onboarding_title_3">In voller Qualität exportieren</string>
@@ -64,7 +64,7 @@
     <string name="film_none">Keiner</string>
     <string name="strip_browse">Alle</string>
     <string name="home_empty_title">Bild laden</string>
-    <string name="home_empty_body">Wähle ein Foto und probiere echte Filmemulsionen aus – Korn, Farbe und alles.</string>
+    <string name="home_empty_body">Fotografiere direkt durch einen Filmtyp oder hol ein vorhandenes Bild dazu.</string>
     <string name="no_favorites_body">Halte einen Film gedrückt, um ihn hier zu behalten.</string>
     <string name="browse_films">Filmbibliothek</string>
     <string name="search_films_hint">Filme suchen</string>
@@ -103,4 +103,22 @@
     <string name="downloading_luts_count">%1$d von %2$d</string>
     <string name="settings_editing">Bearbeitung</string>
     <string name="settings_export_quality_summary">Höhere Qualität bedeutet größere Dateien</string>
+
+    <!-- Camera -->
+    <string name="action_open_camera">Foto aufnehmen</string>
+    <string name="action_shutter">Auslösen</string>
+    <string name="action_flip_camera">Kamera wechseln</string>
+    <string name="action_grid">Raster</string>
+    <string name="action_allow_camera">Kamera erlauben</string>
+    <string name="action_open_settings">Einstellungen öffnen</string>
+    <string name="flash_off">Blitz aus</string>
+    <string name="flash_auto">Blitz automatisch</string>
+    <string name="flash_on">Blitz an</string>
+    <string name="camera_tab_look">Look</string>
+    <string name="camera_frames_label">Bilder</string>
+    <string name="camera_starting">Kamera wird gestartet…</string>
+    <string name="camera_permission_title">Filmroll braucht deine Kamera</string>
+    <string name="camera_permission_body">Erlaube den Kamerazugriff, um dein Motiv direkt durch einen Filmtyp zu sehen.</string>
+    <string name="camera_permission_denied_body">Der Kamerazugriff ist deaktiviert. Aktiviere ihn in den Einstellungen, um durch Film zu fotografieren.</string>
+    <string name="msg_capture_failed">Die Aufnahme hat nicht geklappt. Bitte versuche es erneut.</string>
 </resources>

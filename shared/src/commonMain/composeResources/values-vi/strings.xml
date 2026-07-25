@@ -23,7 +23,7 @@
     <string name="about_text">Filmroll là công cụ mô phỏng màu phim nhựa bằng LUT 3D. Đây là dự án miễn phí và mã nguồn mở. Bạn có thể xem mã nguồn trên GitHub.</string>
     <string name="splash_tagline">Chụp bằng máy số. Cảm nhận như phim.</string>
     <string name="onboarding_title_1">Màu phim thật</string>
-    <string name="onboarding_desc_1">Áp dụng LUT 3D lấy từ các loại phim màu và phim đen trắng kinh điển.</string>
+    <string name="onboarding_desc_1">Ngắm khung hình qua các LUT 3D lấy từ phim màu và phim đen trắng kinh điển — ngay trước khi bấm máy.</string>
     <string name="onboarding_title_2">Tinh chỉnh từng khung hình</string>
     <string name="onboarding_desc_2">Điều chỉnh phơi sáng, tương phản, độ bão hoà và hạt phim cho tới khi vừa ý.</string>
     <string name="onboarding_title_3">Xuất ảnh chất lượng gốc</string>
@@ -64,7 +64,7 @@
     <string name="film_none">Không</string>
     <string name="strip_browse">Tất cả</string>
     <string name="home_empty_title">Chọn một khung hình</string>
-    <string name="home_empty_body">Chọn một tấm ảnh và thử với các loại phim thật — cả hạt phim lẫn màu sắc.</string>
+    <string name="home_empty_body">Chụp thẳng qua một loại phim, hoặc mở tấm ảnh bạn đã có.</string>
     <string name="no_favorites_body">Nhấn giữ một loại phim để giữ nó ở đây.</string>
     <string name="browse_films">Thư viện phim</string>
     <string name="search_films_hint">Tìm loại phim</string>
@@ -103,4 +103,22 @@
     <string name="downloading_luts_count">%1$d trên %2$d</string>
     <string name="settings_editing">Chỉnh sửa</string>
     <string name="settings_export_quality_summary">Chất lượng cao hơn thì tệp lớn hơn</string>
+
+    <!-- Camera -->
+    <string name="action_open_camera">Chụp ảnh</string>
+    <string name="action_shutter">Bấm máy</string>
+    <string name="action_flip_camera">Đổi camera</string>
+    <string name="action_grid">Lưới</string>
+    <string name="action_allow_camera">Cho phép camera</string>
+    <string name="action_open_settings">Mở cài đặt</string>
+    <string name="flash_off">Tắt đèn flash</string>
+    <string name="flash_auto">Đèn flash tự động</string>
+    <string name="flash_on">Bật đèn flash</string>
+    <string name="camera_tab_look">Sắc thái</string>
+    <string name="camera_frames_label">Kiểu ảnh</string>
+    <string name="camera_starting">Đang khởi động camera…</string>
+    <string name="camera_permission_title">Filmroll cần dùng camera</string>
+    <string name="camera_permission_body">Cho phép truy cập camera để ngắm khung hình ngay qua một loại phim.</string>
+    <string name="camera_permission_denied_body">Quyền camera đang tắt. Hãy bật trong Cài đặt để chụp qua phim.</string>
+    <string name="msg_capture_failed">Không chụp được tấm này. Vui lòng thử lại.</string>
 </resources>

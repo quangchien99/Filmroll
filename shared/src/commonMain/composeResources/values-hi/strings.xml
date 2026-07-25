@@ -23,7 +23,7 @@
     <string name="about_text">Filmroll 3D LUT की मदद से एनालॉग फ़िल्म जैसा लुक बनाता है। यह एक मुफ़्त, ओपन-सोर्स प्रोजेक्ट है और इसका सोर्स कोड GitHub पर उपलब्ध है।</string>
     <string name="splash_tagline">डिजिटल में शूट करें, एनालॉग महसूस करें।</string>
     <string name="onboarding_title_1">असली फ़िल्म लुक</string>
-    <string name="onboarding_desc_1">क्लासिक रंगीन और श्वेत-श्याम फ़िल्मों से लिए गए असली 3D LUT लगाएँ।</string>
+    <string name="onboarding_desc_1">शटर दबाने से पहले ही क्लासिक रंगीन और श्वेत-श्याम फ़िल्मों से लिए गए असली 3D LUT के ज़रिए फ़्रेम देखें।</string>
     <string name="onboarding_title_2">हर फ़्रेम को निखारें</string>
     <string name="onboarding_desc_2">एक्सपोज़र, कंट्रास्ट, सैचुरेशन और ग्रेन को तब तक सेट करें जब तक तस्वीर सही न लगे।</string>
     <string name="onboarding_title_3">पूरी क्वालिटी में एक्सपोर्ट</string>
@@ -64,7 +64,7 @@
     <string name="film_none">कोई नहीं</string>
     <string name="strip_browse">सभी</string>
     <string name="home_empty_title">एक फ़्रेम चुनें</string>
-    <string name="home_empty_body">कोई फ़ोटो चुनें और असली फ़िल्म के दाने और रंग आज़माएँ।</string>
+    <string name="home_empty_body">किसी फ़िल्म स्टॉक के ज़रिए शूट करें, या पहले से मौजूद फ़ोटो चुनें।</string>
     <string name="no_favorites_body">किसी फ़िल्म को दबाकर रखें ताकि वह यहाँ बनी रहे।</string>
     <string name="browse_films">फ़िल्म लाइब्रेरी</string>
     <string name="search_films_hint">फ़िल्म खोजें</string>
@@ -103,4 +103,22 @@
     <string name="downloading_luts_count">%2$d में से %1$d</string>
     <string name="settings_editing">संपादन</string>
     <string name="settings_export_quality_summary">अधिक गुणवत्ता यानी बड़ी फ़ाइलें</string>
+
+    <!-- Camera -->
+    <string name="action_open_camera">फ़ोटो लें</string>
+    <string name="action_shutter">शटर दबाएँ</string>
+    <string name="action_flip_camera">कैमरा बदलें</string>
+    <string name="action_grid">ग्रिड</string>
+    <string name="action_allow_camera">कैमरा अनुमति दें</string>
+    <string name="action_open_settings">सेटिंग खोलें</string>
+    <string name="flash_off">फ़्लैश बंद</string>
+    <string name="flash_auto">फ़्लैश ऑटो</string>
+    <string name="flash_on">फ़्लैश चालू</string>
+    <string name="camera_tab_look">लुक</string>
+    <string name="camera_frames_label">फ़्रेम</string>
+    <string name="camera_starting">कैमरा शुरू हो रहा है…</string>
+    <string name="camera_permission_title">Filmroll को आपका कैमरा चाहिए</string>
+    <string name="camera_permission_body">फ़िल्म स्टॉक के ज़रिए फ़्रेम देखने के लिए कैमरे की अनुमति दें।</string>
+    <string name="camera_permission_denied_body">कैमरा एक्सेस बंद है। फ़िल्म के साथ शूट करने के लिए इसे सेटिंग में चालू करें।</string>
+    <string name="msg_capture_failed">यह शॉट नहीं लिया जा सका। कृपया फिर कोशिश करें।</string>
 </resources>

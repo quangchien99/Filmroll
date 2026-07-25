@@ -23,7 +23,7 @@
     <string name="about_text">Filmroll은 3D LUT로 아날로그 필름의 색감을 재현하는 도구입니다. 무료 오픈소스 프로젝트이며 소스 코드는 GitHub에서 볼 수 있습니다.</string>
     <string name="splash_tagline">디지털로 찍고, 필름으로 느끼세요.</string>
     <string name="onboarding_title_1">진짜 필름 룩</string>
-    <string name="onboarding_desc_1">클래식 컬러 필름과 흑백 필름에서 뽑아낸 3D LUT를 그대로 적용하세요.</string>
+    <string name="onboarding_desc_1">고전 컬러·흑백 필름에서 추출한 3D LUT로, 셔터를 누르기 전에 실시간으로 구도를 잡아 보세요.</string>
     <string name="onboarding_title_2">한 컷씩 다듬기</string>
     <string name="onboarding_desc_2">노출, 대비, 채도, 그레인을 원하는 느낌이 나올 때까지 조절할 수 있습니다.</string>
     <string name="onboarding_title_3">최고 품질로 내보내기</string>
@@ -64,7 +64,7 @@
     <string name="film_none">없음</string>
     <string name="strip_browse">전체</string>
     <string name="home_empty_title">사진 불러오기</string>
-    <string name="home_empty_body">사진을 고르고 실제 필름의 입자와 색을 입혀 보세요.</string>
+    <string name="home_empty_body">필름 너머로 촬영하거나, 이미 가진 사진을 불러오세요.</string>
     <string name="no_favorites_body">필름을 길게 눌러 이곳에 보관하세요.</string>
     <string name="browse_films">필름 라이브러리</string>
     <string name="search_films_hint">필름 검색</string>
@@ -103,4 +103,22 @@
     <string name="downloading_luts_count">%2$d개 중 %1$d개</string>
     <string name="settings_editing">편집</string>
     <string name="settings_export_quality_summary">품질이 높을수록 파일이 커집니다</string>
+
+    <!-- Camera -->
+    <string name="action_open_camera">사진 찍기</string>
+    <string name="action_shutter">촬영</string>
+    <string name="action_flip_camera">카메라 전환</string>
+    <string name="action_grid">격자</string>
+    <string name="action_allow_camera">카메라 허용</string>
+    <string name="action_open_settings">설정 열기</string>
+    <string name="flash_off">플래시 끔</string>
+    <string name="flash_auto">플래시 자동</string>
+    <string name="flash_on">플래시 켬</string>
+    <string name="camera_tab_look">룩</string>
+    <string name="camera_frames_label">컷</string>
+    <string name="camera_starting">카메라를 시작하는 중…</string>
+    <string name="camera_permission_title">Filmroll에 카메라가 필요합니다</string>
+    <string name="camera_permission_body">필름 너머로 구도를 잡으려면 카메라 접근을 허용하세요.</string>
+    <string name="camera_permission_denied_body">카메라 접근이 꺼져 있습니다. 필름으로 촬영하려면 설정에서 켜 주세요.</string>
+    <string name="msg_capture_failed">사진을 찍지 못했습니다. 다시 시도해 주세요.</string>
 </resources>

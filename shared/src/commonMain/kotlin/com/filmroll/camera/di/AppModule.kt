@@ -1,6 +1,7 @@
 package com.filmroll.camera.di
 
 
+import com.filmroll.camera.capture.captureRelayModule
 import com.filmroll.camera.data.source.filmRepoModule
 import com.filmroll.camera.data.source.local.appDBModule
 import com.filmroll.camera.data.source.local.filmLocalDataSourceModule
@@ -13,6 +14,7 @@ import com.filmroll.camera.screens.language.languageScreenModule
 import com.filmroll.camera.screens.onboarding.onboardingScreenModule
 import com.filmroll.camera.screens.settings.settingsScreenModel
 import com.filmroll.camera.screens.splash.splashScreenModule
+import com.filmroll.camera.screens.camera.cameraScreenModule
 import com.filmroll.camera.screens.home.homeScreenModule
 
 /**
@@ -20,6 +22,8 @@ import com.filmroll.camera.screens.home.homeScreenModule
  */
 fun appModule() = listOf(
     homeScreenModule,
+    cameraScreenModule,
+    captureRelayModule,
     httpClientModule,
     appDBModule,
     filmLocalDataSourceModule,

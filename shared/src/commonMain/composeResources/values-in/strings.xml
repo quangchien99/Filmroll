@@ -23,7 +23,7 @@
     <string name="about_text">Filmroll adalah alat untuk meniru tampilan film analog menggunakan LUT 3D. Proyek ini gratis dan sumber terbuka. Kode sumbernya tersedia di GitHub.</string>
     <string name="splash_tagline">Potret digital. Rasa analog.</string>
     <string name="onboarding_title_1">Tampilan film sungguhan</string>
-    <string name="onboarding_desc_1">Terapkan LUT 3D autentik yang diambil dari film warna dan hitam-putih klasik.</string>
+    <string name="onboarding_desc_1">Bingkai gambar lewat LUT 3D asli dari film warna dan hitam-putih klasik — langsung, sebelum rana ditekan.</string>
     <string name="onboarding_title_2">Poles setiap frame</string>
     <string name="onboarding_desc_2">Atur eksposur, kontras, saturasi, dan grain sampai hasilnya terasa pas.</string>
     <string name="onboarding_title_3">Ekspor kualitas penuh</string>
@@ -64,7 +64,7 @@
     <string name="film_none">Tidak ada</string>
     <string name="strip_browse">Semua</string>
     <string name="home_empty_title">Muat sebuah bingkai</string>
-    <string name="home_empty_body">Pilih foto lalu coba dengan film sungguhan — butiran, warna, semuanya.</string>
+    <string name="home_empty_body">Memotretlah lewat sebuah film, atau ambil foto yang sudah Anda punya.</string>
     <string name="no_favorites_body">Tekan lama sebuah film untuk menyimpannya di sini.</string>
     <string name="browse_films">Pustaka film</string>
     <string name="search_films_hint">Cari film</string>
@@ -103,4 +103,22 @@
     <string name="downloading_luts_count">%1$d dari %2$d</string>
     <string name="settings_editing">Penyuntingan</string>
     <string name="settings_export_quality_summary">Kualitas lebih tinggi berarti berkas lebih besar</string>
+
+    <!-- Camera -->
+    <string name="action_open_camera">Ambil foto</string>
+    <string name="action_shutter">Ambil gambar</string>
+    <string name="action_flip_camera">Ganti kamera</string>
+    <string name="action_grid">Kisi</string>
+    <string name="action_allow_camera">Izinkan kamera</string>
+    <string name="action_open_settings">Buka pengaturan</string>
+    <string name="flash_off">Lampu kilat mati</string>
+    <string name="flash_auto">Lampu kilat otomatis</string>
+    <string name="flash_on">Lampu kilat menyala</string>
+    <string name="camera_tab_look">Tampilan</string>
+    <string name="camera_frames_label">Bidikan</string>
+    <string name="camera_starting">Memulai kamera…</string>
+    <string name="camera_permission_title">Filmroll butuh kamera Anda</string>
+    <string name="camera_permission_body">Izinkan akses kamera untuk membingkai foto langsung lewat sebuah film.</string>
+    <string name="camera_permission_denied_body">Akses kamera nonaktif. Aktifkan di Pengaturan untuk memotret lewat film.</string>
+    <string name="msg_capture_failed">Gagal mengambil foto itu. Silakan coba lagi.</string>
 </resources>

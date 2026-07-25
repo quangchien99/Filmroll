@@ -23,7 +23,7 @@
     <string name="about_text">Filmroll es una herramienta para simular el aspecto de la película analógica con LUT 3D. Es un proyecto libre y de código abierto. Puedes ver el código en GitHub.</string>
     <string name="splash_tagline">Dispara en digital. Siente el analógico.</string>
     <string name="onboarding_title_1">Estética de película real</string>
-    <string name="onboarding_desc_1">Aplica LUT 3D auténticos tomados de películas clásicas en color y blanco y negro.</string>
+    <string name="onboarding_desc_1">Encuadra a través de LUT 3D auténticos de películas clásicas en color y blanco y negro, en directo y antes de disparar.</string>
     <string name="onboarding_title_2">Ajusta cada fotograma</string>
     <string name="onboarding_desc_2">Afina exposición, contraste, saturación y grano hasta que la foto quede como quieres.</string>
     <string name="onboarding_title_3">Exporta con la máxima calidad</string>
@@ -64,7 +64,7 @@
     <string name="film_none">Ninguna</string>
     <string name="strip_browse">Todas</string>
     <string name="home_empty_title">Carga un fotograma</string>
-    <string name="home_empty_body">Elige una foto y pruébala con emulsiones reales: grano, color y todo.</string>
+    <string name="home_empty_body">Dispara a través de una película o trae una foto que ya tengas.</string>
     <string name="no_favorites_body">Mantén pulsada una película para guardarla aquí.</string>
     <string name="browse_films">Biblioteca de películas</string>
     <string name="search_films_hint">Buscar películas</string>
@@ -103,4 +103,22 @@
     <string name="downloading_luts_count">%1$d de %2$d</string>
     <string name="settings_editing">Edición</string>
     <string name="settings_export_quality_summary">Más calidad significa archivos más grandes</string>
+
+    <!-- Camera -->
+    <string name="action_open_camera">Hacer una foto</string>
+    <string name="action_shutter">Disparar</string>
+    <string name="action_flip_camera">Cambiar de cámara</string>
+    <string name="action_grid">Cuadrícula</string>
+    <string name="action_allow_camera">Permitir cámara</string>
+    <string name="action_open_settings">Abrir ajustes</string>
+    <string name="flash_off">Flash desactivado</string>
+    <string name="flash_auto">Flash automático</string>
+    <string name="flash_on">Flash activado</string>
+    <string name="camera_tab_look">Estilo</string>
+    <string name="camera_frames_label">Fotogramas</string>
+    <string name="camera_starting">Iniciando la cámara…</string>
+    <string name="camera_permission_title">Filmroll necesita tu cámara</string>
+    <string name="camera_permission_body">Permite el acceso a la cámara para encuadrar tu foto a través de una película.</string>
+    <string name="camera_permission_denied_body">El acceso a la cámara está desactivado. Actívalo en Ajustes para disparar con película.</string>
+    <string name="msg_capture_failed">No se pudo hacer la foto. Inténtalo de nuevo.</string>
 </resources>

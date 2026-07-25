@@ -23,7 +23,7 @@
     <string name="about_text">O Filmroll simula o visual do filme analógico usando LUTs 3D. É um projeto gratuito e de código aberto. Você encontra o código no GitHub.</string>
     <string name="splash_tagline">Fotografe em digital. Sinta o analógico.</string>
     <string name="onboarding_title_1">Visual de filme de verdade</string>
-    <string name="onboarding_desc_1">Aplique LUTs 3D autênticas capturadas de filmes clássicos coloridos e em preto e branco.</string>
+    <string name="onboarding_desc_1">Enquadre através de LUTs 3D autênticos de filmes clássicos em cor e preto e branco — ao vivo, antes do disparo.</string>
     <string name="onboarding_title_2">Ajuste cada quadro</string>
     <string name="onboarding_desc_2">Regule exposição, contraste, saturação e granulação até a foto ficar do jeito certo.</string>
     <string name="onboarding_title_3">Exporte em qualidade máxima</string>
@@ -64,7 +64,7 @@
     <string name="film_none">Nenhum</string>
     <string name="strip_browse">Todos</string>
     <string name="home_empty_title">Carregue um quadro</string>
-    <string name="home_empty_body">Escolha uma foto e experimente filmes de verdade — grão, cor e tudo mais.</string>
+    <string name="home_empty_body">Fotografe através de um filme ou traga uma foto que você já tem.</string>
     <string name="no_favorites_body">Toque e segure um filme para mantê-lo aqui.</string>
     <string name="browse_films">Biblioteca de filmes</string>
     <string name="search_films_hint">Buscar filmes</string>
@@ -103,4 +103,22 @@
     <string name="downloading_luts_count">%1$d de %2$d</string>
     <string name="settings_editing">Edição</string>
     <string name="settings_export_quality_summary">Mais qualidade significa arquivos maiores</string>
+
+    <!-- Camera -->
+    <string name="action_open_camera">Tirar uma foto</string>
+    <string name="action_shutter">Disparar</string>
+    <string name="action_flip_camera">Trocar de câmera</string>
+    <string name="action_grid">Grade</string>
+    <string name="action_allow_camera">Permitir câmera</string>
+    <string name="action_open_settings">Abrir ajustes</string>
+    <string name="flash_off">Flash desligado</string>
+    <string name="flash_auto">Flash automático</string>
+    <string name="flash_on">Flash ligado</string>
+    <string name="camera_tab_look">Visual</string>
+    <string name="camera_frames_label">Poses</string>
+    <string name="camera_starting">Iniciando a câmera…</string>
+    <string name="camera_permission_title">O Filmroll precisa da sua câmera</string>
+    <string name="camera_permission_body">Permita o acesso à câmera para enquadrar sua foto através de um filme.</string>
+    <string name="camera_permission_denied_body">O acesso à câmera está desligado. Ative nos Ajustes para fotografar através do filme.</string>
+    <string name="msg_capture_failed">Não foi possível tirar essa foto. Tente novamente.</string>
 </resources>

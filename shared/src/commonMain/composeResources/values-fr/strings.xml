@@ -23,7 +23,7 @@
     <string name="about_text">Filmroll est un outil qui simule le rendu de la pellicule argentique à l’aide de LUT 3D. C’est un projet libre et open source. Le code est disponible sur GitHub.</string>
     <string name="splash_tagline">Photographiez en numérique. Ressentez l’argentique.</string>
     <string name="onboarding_title_1">De vrais rendus argentiques</string>
-    <string name="onboarding_desc_1">Appliquez des LUT 3D authentiques issues de pellicules couleur et noir et blanc classiques.</string>
+    <string name="onboarding_desc_1">Cadrez à travers de véritables LUT 3D issues de pellicules couleur et noir et blanc classiques, en direct, avant le déclenchement.</string>
     <string name="onboarding_title_2">Peaufinez chaque image</string>
     <string name="onboarding_desc_2">Réglez exposition, contraste, saturation et grain jusqu’au rendu exact que vous cherchez.</string>
     <string name="onboarding_title_3">Exportez en pleine qualité</string>
@@ -64,7 +64,7 @@
     <string name="film_none">Aucun</string>
     <string name="strip_browse">Tous</string>
     <string name="home_empty_title">Chargez une image</string>
-    <string name="home_empty_body">Choisissez une photo et essayez de vraies pellicules — grain, couleurs et tout le reste.</string>
+    <string name="home_empty_body">Photographiez à travers une pellicule, ou importez une image que vous avez déjà.</string>
     <string name="no_favorites_body">Appuyez longuement sur un film pour le garder ici.</string>
     <string name="browse_films">Bibliothèque de films</string>
     <string name="search_films_hint">Rechercher un film</string>
@@ -103,4 +103,22 @@
     <string name="downloading_luts_count">%1$d sur %2$d</string>
     <string name="settings_editing">Retouche</string>
     <string name="settings_export_quality_summary">Une qualité plus élevée donne des fichiers plus lourds</string>
+
+    <!-- Camera -->
+    <string name="action_open_camera">Prendre une photo</string>
+    <string name="action_shutter">Déclencher</string>
+    <string name="action_flip_camera">Changer d\'appareil</string>
+    <string name="action_grid">Grille</string>
+    <string name="action_allow_camera">Autoriser l\'appareil photo</string>
+    <string name="action_open_settings">Ouvrir les réglages</string>
+    <string name="flash_off">Flash désactivé</string>
+    <string name="flash_auto">Flash automatique</string>
+    <string name="flash_on">Flash activé</string>
+    <string name="camera_tab_look">Rendu</string>
+    <string name="camera_frames_label">Vues</string>
+    <string name="camera_starting">Démarrage de l\'appareil photo…</string>
+    <string name="camera_permission_title">Filmroll a besoin de votre appareil photo</string>
+    <string name="camera_permission_body">Autorisez l\'accès à l\'appareil photo pour cadrer votre image à travers une pellicule.</string>
+    <string name="camera_permission_denied_body">L\'accès à l\'appareil photo est désactivé. Activez-le dans les Réglages pour photographier à travers la pellicule.</string>
+    <string name="msg_capture_failed">Impossible de prendre cette photo. Réessayez.</string>
 </resources>

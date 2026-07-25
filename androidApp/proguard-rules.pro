@@ -11,6 +11,7 @@
 -keep class com.filmroll.camera.**ScreenModel { *; }
 -keep class com.filmroll.camera.data.source.** { *; }
 -keep class com.filmroll.camera.lut.** { *; }
+-keep class com.filmroll.camera.capture.CaptureRelay { *; }
 -keepclassmembers class * {
     @org.koin.core.annotation.* <methods>;
 }
