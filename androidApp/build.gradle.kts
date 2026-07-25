@@ -57,10 +57,10 @@ val extractSkikoJni = tasks.register<ExtractSkikoJni>("extractSkikoJni") {
 }
 
 android {
-    namespace = "io.github.yahiaangelo.filmsimulator.android"
+    namespace = "com.filmroll.camera.android"
     compileSdk = 37
     defaultConfig {
-        applicationId = "io.github.yahiaangelo.filmsimulator.android"
+        applicationId = "com.filmroll.camera"
         minSdk = 24
         targetSdk = 37
         versionCode = 15

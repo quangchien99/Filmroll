@@ -14,9 +14,15 @@ plugins {
 sqldelight {
     databases {
         create("Database") {
-            packageName.set("io.github.yahiaangelo.filmsimulator")
+            packageName.set("com.filmroll.camera")
         }
     }
+}
+
+compose.resources {
+    // Pinned so the generated `Res` class keeps a stable import path regardless of the
+    // Gradle project name.
+    packageOfResClass = "com.filmroll.camera.resources"
 }
 
 kotlin {
@@ -117,7 +123,7 @@ kotlin {
 }
 
 android {
-    namespace = "io.github.yahiaangelo.filmsimulator"
+    namespace = "com.filmroll.camera"
     compileSdk = 37
     defaultConfig {
         minSdk = 24

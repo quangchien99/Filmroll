@@ -1,0 +1,57 @@
+package com.filmroll.camera.data.source
+
+import com.filmroll.camera.FavoriteLut
+import com.filmroll.camera.FilmLut
+import com.filmroll.camera.LutCube
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+
+/**
+ * Interface to the film data layer.
+ */
+interface FilmRepository {
+
+    fun getFilmsStream(): Flow<List<FilmLut>>
+
+    suspend fun getFilms(forceUpdate: Boolean = false): List<FilmLut>
+
+    suspend fun refresh()
+
+    suspend fun downloadFilmLuts(): List<FilmLut>
+
+    fun getFilmStream(name: String): Flow<FilmLut?>
+
+    suspend fun createFilm(name: String, category: String, thumbnail: String, lut: String)
+
+    suspend fun getLutCube(name: String): LutCube?
+
+    suspend fun saveLutCube(name: String, lutFile: ByteArray)
+
+    suspend fun downloadLutCube(name: String)
+
+    suspend fun downloadAllLutCubes(onProgress: (Int, Int) -> Unit): Boolean
+
+    suspend fun generateLutThumbnail(filmLut: FilmLut, inputImage: String): String
+
+    suspend fun applyFilmLut(scope: CoroutineScope, filmLut: FilmLut, image: String, onComplete: (String) -> Unit, onError: (String) -> Unit)
+
+    /**
+     * Return the raw .cube bytes for [filmLut], downloading them on first use.
+     * Used by the live-preview pipeline so it can render the LUT directly through
+     * Skia without going through the on-disk roundtrip that [applyFilmLut] does.
+     */
+    suspend fun getLutBytes(filmLut: FilmLut): ByteArray?
+
+    // Methods for handling favorite LUTs
+    fun getFavoriteFilmsStream(): Flow<List<FavoriteLut>>
+
+    suspend fun getFavoriteFilms(): List<FavoriteLut>
+
+    fun getFavoriteFilmStream(name: String): Flow<FavoriteLut?>
+
+    suspend fun addFavoriteFilm(filmLut: FavoriteLut): List<FavoriteLut>
+
+    suspend fun removeFavoriteFilm(name: String): List<FavoriteLut>
+
+    suspend fun clearFavoriteFilms()
+}

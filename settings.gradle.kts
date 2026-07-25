@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Film_Simulator"
+rootProject.name = "Filmroll"
 include(":androidApp")
 include(":shared")
 

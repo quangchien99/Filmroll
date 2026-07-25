@@ -377,7 +377,7 @@
 					"\"shared\"",
 					"-lsqlite3",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.github.yahiaangelo.filmsimulator.iosApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.filmroll.camera;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -419,7 +419,7 @@
 					"\"shared\"",
 					"-lsqlite3",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.github.yahiaangelo.filmsimulator.iosApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.filmroll.camera;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
