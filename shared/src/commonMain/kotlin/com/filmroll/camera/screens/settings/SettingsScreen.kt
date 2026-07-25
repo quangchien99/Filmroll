@@ -54,7 +54,6 @@ import com.filmroll.camera.data.source.local.ThemeMode
 import com.filmroll.camera.lut.LutDownloadManager
 import com.filmroll.camera.resources.Res
 import com.filmroll.camera.resources.about
-import com.filmroll.camera.resources.action_apply
 import com.filmroll.camera.resources.app_version
 import com.filmroll.camera.resources.appearance
 import com.filmroll.camera.resources.cancel

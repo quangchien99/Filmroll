@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -133,7 +134,7 @@ private fun SplashContent(modifier: Modifier = Modifier) {
                     )
                 }
 
-                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
                     text = stringResource(Res.string.app_full_name),
@@ -143,7 +144,7 @@ private fun SplashContent(modifier: Modifier = Modifier) {
                     textAlign = TextAlign.Center,
                 )
 
-                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = stringResource(Res.string.splash_tagline),
