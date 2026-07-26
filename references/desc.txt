@@ -1,0 +1,25 @@
+ProCCD is an analog digital camera application. We have carefully reproduced the classic appearance of CCD digital cameras and the unique interface of pixel style, with CCD camera-inspired vintage filter effects, striving to restore the most authentic shooting experience. It can also serve as photo and video editor as you can import and edit them with retro presets and advanced tools.
+
+#Chic cam & 90s vibe aesthetic editing app
+- Z30: Rich colors & lofi quality make it suitable for various scenes.
+- IXUS95: The color is slightly greenish when the light is dark, with a disposable camera feel.
+- U300: The cool, transparent blue-green tones give the photos a melancholy ee35 film atmosphere, with excellent color performance for scenes such as seawater and sky.
+- M532: Low color saturation and slight fading effect give photos a nostalgic prequel vibe. Suitable for portraits and outdoor shooting on sunny days.
+- New cameras for foodies, DCR and dazz cam will be released! Take you back to 1988. The 80s & 2000s Y2k aesthetic fashion style is ready for you.
+
+#Professional features that unleash creativity
+- Record videos with lomography oldroll filters, dsco inst sqc and light leaks. HD quality like raw camera is available.
+- Fully adjustable camera parameters such as ISO, exposure compensation, and color saturation. White balance and shutter speed are also available. You can create a dazz VHS style picture with an ee35-style vignette and grain, make photo vintage.
+- Classic timestamp to present the nostalgic feel. Various dispo styles are available. You can also customize the date as you like.
+- The viewfinder previews the effect in real-time, what you see is what you get.
+- Turn on the flash to record your perfect moment.
+- Support timed shooting and flip lens.
+- Choose unique photo filters and frames to add a vintage ee35 film look to your content in the white album.
+- Collage layouts and templates for any mood and aesthetic in different shapes and styles, and make creative d3d stories.
+
+#Advanced Editing Tools
+- Batch import pics & videos. Add nomo aesthetics filters to present polaroid feel with one click.
+- Crop videos to different ratios and trim your videos.
+- Record 35mm sweet filmm with photo timer, use lens buddy to take a selfie.
+
+Whether you are a disposable camera lover or a polaroid lover, we recommend you try CCD digital camera now. Record those wonderful moments with ProCCD now!

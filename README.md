@@ -122,19 +122,9 @@ default on iOS, where the change takes effect on the next launch.
   shared code cannot reach an `Activity`.
 - **Debug tooling:** `isDebugBuild` gates the Settings → Debug section. Clearing app data wipes
   preferences, the local database and the cache, then relaunches at the splash screen.
+- **LUT files:** `.cube` files are fetched at runtime from the public Film-Luts GitHub repository —
+  see `GITHUB_BASE_URL` in `data/source/network/FilmNetworkDataSource.kt`.
 
-## LUTs acknowledgment
+## Status
 
-The film LUTs are sourced from the public
-[YahiaAngelo/Film-Luts](https://github.com/YahiaAngelo/Film-Luts) repository and are not owned by
-this project.
-
-## Credits
-
-Filmroll started as a fork of the MIT-licensed
-[Film Simulator](https://github.com/YahiaAngelo/Film-Simulator) project by YahiaAngelo, and has
-since been rebranded and extended.
-
-## License
-
-Distributed under the MIT License. See [`LICENSE.txt`](LICENSE.txt).
+Private project, built for personal use. Not published or distributed.

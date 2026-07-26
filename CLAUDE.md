@@ -8,8 +8,7 @@ Filmroll ("Filmroll: Vintage Camera", applicationId `com.filmroll.camera`) is a 
 mobile app built with Kotlin Multiplatform and Compose Multiplatform. It applies film-like 3D LUTs
 and image adjustments to photos on Android and iOS.
 
-It began as a fork of [YahiaAngelo/Film-Simulator](https://github.com/YahiaAngelo/Film-Simulator)
-and has since been rebranded, repackaged and extended.
+It is a private project, built for personal use and not distributed.
 
 ## Build Commands
 
